@@ -58,4 +58,5 @@ COPY config/mapred-site.xml /home/hadoop/hadoop/etc/hadoop/mapred-site.xml
 COPY config/yarn-site.xml /home/hadoop/hadoop/etc/hadoop/yarn-site.xml
 COPY config/zoo.cfg /home/hadoop/zookeeper/conf/zoo.cfg
 
-CMD ["/bin/bash"]
+
+ENTRYPOINT [ "bash", "/home/hadoop/entrypoint.sh" ]
