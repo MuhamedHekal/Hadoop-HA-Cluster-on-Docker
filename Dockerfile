@@ -41,8 +41,6 @@ RUN wget https://archive.apache.org/dist/zookeeper/zookeeper-3.6.4/apache-zookee
     rm apache-zookeeper-3.6.4-bin.tar.gz && \
     mkdir -p zookeeper/data
 
-
-    
 # Configure SSH
 RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
@@ -53,7 +51,11 @@ RUN mkdir -p /home/hadoop/hadoopdata/hdfs/namenode \
     && mkdir -p /home/hadoop/hadoopdata/hdfs/datanode \
     && mkdir -p /home/hadoop/hadoopdata/hdfs/journalnode
 
-# Copy configuration files (these will be added in docker-compose with volumes)
-# Alternatively, you could ADD them here if they're static
+# Copy configuration files
+COPY config/core-site.xml /home/hadoop/hadoop/etc/hadoop/core-site.xml
+COPY config/hdfs-site.xml /home/hadoop/hadoop/etc/hadoop/hdfs-site.xml
+COPY config/mapred-site.xml /home/hadoop/hadoop/etc/hadoop/mapred-site.xml
+COPY config/yarn-site.xml /home/hadoop/hadoop/etc/hadoop/yarn-site.xml
+COPY config/zoo.cfg /home/hadoop/zookeeper/conf/zoo.cfg
 
 CMD ["/bin/bash"]
