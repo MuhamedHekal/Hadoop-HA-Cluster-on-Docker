@@ -1,0 +1,90 @@
+    1  sudo apt update && sudo apt install openjdk-8-jdk
+    2  sudo apt install ssh
+    3  # configure SSH
+    4  ssh-keygen -t rsa
+    5  # set the key in auth keys and set permission 
+    6  cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys   
+    7  chmod 640 ~/.ssh/authorized_keys
+    8  sudo apt update && sudo apt install ufw -y
+    9  sudo service ssh start
+   10  cp /data/hadoop-3.3.6-aarch64.tar.gz /home/hadoop/
+   11  ls
+   12  tar -xzvf hadoop-3.3.6-aarch64.tar.gz 
+   13  mv hadoop-3.3.6 hadoop
+   14  vi .bashrc 
+   15  sudo apt update && sudo apt install vim -y
+   16  history
+   17  vim .bashrc 
+   18  source ~/.bashrc
+   19  vi $HADOOP_HOME/etc/hadoop/hadoop-env.sh
+   20  cd hadoop/
+   21  mkdir -p ~/hadoopdata/hdfs/{namenode,datanode,journalnode}
+   22  rm hadoop/etc/hadoop/hdfs-site.xml 
+   23  cp /data/hdfs-site.xml hadoop/etc/hadoop/hdfs-site.xml
+   24  cd
+   25  rm hadoop/etc/hadoop/hdfs-site.xml 
+   26  cp /data/hdfs-site.xml hadoop/etc/hadoop/hdfs-site.xml
+   27  rm hadoop/etc/hadoop/core-site.xml 
+   28  cp /data/core-site.xml hadoop/etc/hadoop/core-site.xml
+   29  rm hadoop/etc/hadoop/mapred-site.xml 
+   30  cp /data/mapred-site.xml hadoop/etc/hadoop/mapred-site.xml
+   31  rm hadoop/etc/hadoop/yarn-site.xml 
+   32  cp /data/yarn-site.xml hadoop/etc/hadoop/yarn-site.xml
+   33  wget https://archive.apache.org/dist/zookeeper/zookeeper-3.6.4/apache-zookeeper-3.6.4-bin.tar.gz
+   34  tar -xzf apache-zookeeper-3.6.4-bin.tar.gz 
+   35  mv apache-zookeeper-3.6.4-bin zookeeper
+   36  cd zookeeper/
+   37  ls
+   38  mkdir data
+   39  ls conf/
+   40  cd conf/
+   41  vi zoo.cfg
+   42  cd
+   43  zookeeper/bin/zkServer.sh start
+   44  ls zookeeper/data/
+   45  jps
+   46  zookeeper/bin/zkServer.sh start
+   47  echo 1 > /home/hadoop/zookeeper/data/myid
+   48  zookeeper/bin/zkServer.sh start
+   49  jps
+   50  zookeeper/bin/zkServer.sh start
+   51  jps
+   52  vi zookeeper/data/myid 
+   53  zookeeper/bin/zkServer.sh start
+   54  echo Master1 > /home/hadoop/zookeeper/data/myid
+   55  zookeeper/bin/zkServer.sh start
+   56  vi zookeeper/data/myid 
+   57  echo 1 > /home/hadoop/zookeeper/data/myid
+   58  vi zookeeper/data/myid 
+   59  zookeeper/bin/zkServer.sh start
+   60  jps
+   61  lshdfs --daemon start yarn
+   62  hdfs --daemon start yarn
+   63  $HADOOP_HOME
+   64  cat ~/.bashrc 
+   65  ls
+   66  ls hadoop
+   67  ls
+   68  pwd
+   69  ls
+   70  cat zookeeper/data/myid
+   71  cat $HADOOP_HOME/etc/hadoop/hdfs-site.xml
+   72  zookeeper/bin/zkServer.sh start
+   73  jps
+   74  hdfs namenode -format
+   75  zookeeper/bin/zkServer.sh start
+   76  jps
+   77  hadoop-daemon.sh start namenode
+   78  hdfs --daemon start namenode
+   79  hdfs namenode -format
+   80  mkdir -p ~/hadoopdata/hdfs/{namenode,datanode,journalnode}
+   81  cat $HADOOP_HOME/etc/hadoop/core-site.xml
+   82  hdfs --daemon start zkfc
+   83  hdfs namenode -initializeSharedEdits
+   84  jps
+   85  zookeeper/bin/zkServer.sh start
+   86  hdfs --daemon start journalnode
+   87  jps
+   88  hdfs --daemon start namenode
+   89  history
+   90  history>>/data/history.txt 
