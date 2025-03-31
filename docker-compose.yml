@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   master1:
@@ -6,12 +6,8 @@ services:
     hostname: master1
     container_name: master1
     ports:
-      - "9871:9870"
-      - "8021:8020"
-      - "2181:2181"
-      - "2888:2888"
-      - "3888:3888"
-      - "8088:8088"
+      - "9871:9870" # NameNode HTTP
+      - "8088:8088" # YARN ResourceManager
     volumes:
       - master1-journalnode:/home/hadoop/hadoopdata/hdfs/journalnode
       - master1-namenode:/home/hadoop/hadoopdata/hdfs/namenode
@@ -20,19 +16,19 @@ services:
     environment:
       - MYID=1
       - ROLE=master
-    #entrypoint: ["sudo", "/bin/bash", "/home/hadoop/entrypoint.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "jps | grep -E 'NameNode|ResourceManager'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   master2:
     build: .
     hostname: master2
     container_name: master2
     ports:
-      - "9872:9870"
-      - "8022:8020"
-      - "2182:2181"
-      - "2889:2888"
-      - "3889:3888"
-      - "8089:8088"
+      - "9872:9870" # NameNode HTTP
+      - "8089:8088" # YARN ResourceManager
     volumes:
       - master2-journalnode:/home/hadoop/hadoopdata/hdfs/journalnode
       - master2-namenode:/home/hadoop/hadoopdata/hdfs/namenode
@@ -41,19 +37,19 @@ services:
     environment:
       - MYID=2
       - ROLE=master
-    #entrypoint: ["sudo", "/bin/bash", "/home/hadoop/entrypoint.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "jps | grep -E 'NameNode|ResourceManager'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   master3:
     build: .
     hostname: master3
     container_name: master3
     ports:
-      - "9873:9870"
-      - "8023:8020"
-      - "2183:2181"
-      - "2890:2888"
-      - "3890:3888"
-      - "8090:8088"
+      - "9873:9870" # NameNode HTTP
+      - "8090:8088" # YARN ResourceManager
     volumes:
       - master3-journalnode:/home/hadoop/hadoopdata/hdfs/journalnode
       - master3-namenode:/home/hadoop/hadoopdata/hdfs/namenode
@@ -62,6 +58,12 @@ services:
     environment:
       - MYID=3
       - ROLE=master
+    healthcheck:
+      test: ["CMD-SHELL", "jps | grep -E 'NameNode|ResourceManager'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   worker1:
     build: .
     hostname: worker1
@@ -71,6 +73,19 @@ services:
       - ./config/entrypoint.sh:/home/hadoop/entrypoint.sh
     environment:
       - ROLE=worker
+    healthcheck:
+      test: ["CMD", "ls", "/home/hadoop/hadoopdata/hdfs/datanode"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      master1:
+        condition: service_healthy
+      master2:
+        condition: service_healthy
+      master3:
+        condition: service_healthy
+
 volumes:
   master1-journalnode:
   master1-namenode:
