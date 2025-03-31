@@ -2,14 +2,14 @@
 FROM ubuntu:22.04
 
 # Install dependencies and configure system
-RUN apt-get update && \
-    apt-get install -y sudo openssh-server openjdk-8-jdk wget vim net-tools
-
-# Create hadoop user and group
-RUN groupadd hadoopG && \
-    useradd -m -g hadoopG -s /bin/bash hadoop && \
-    echo "hadoop ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
-    echo "hadoop:123" | chpasswd
+RUN apt-get update && apt-get install -y --no-install-recommends \ 
+    sudo \
+    openssh-server \
+    wget \
+    vim \
+    net-tools \
+    openjdk-8-jdk \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables globally
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64
@@ -24,6 +24,12 @@ ENV HADOOP_OPTS="-Djava.library.path=$HADOOP_HOME/lib/native"
 ENV ZOOKEEPER_HOME=/home/hadoop/zookeeper
 ENV PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin:$ZOOKEEPER_HOME/bin
 ENV LD_LIBRARY_PATH=$HADOOP_HOME/lib/native:$LD_LIBRARY_PATH
+
+# Create hadoop user and group
+RUN groupadd hadoopG && \
+    useradd -m -g hadoopG -s /bin/bash hadoop && \
+    echo "hadoop ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    echo "hadoop:123" | chpasswd
 
 # Switch to hadoop user for remaining setup
 USER hadoop
@@ -51,12 +57,9 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
 RUN mkdir -p /home/hadoop/hadoopdata/hdfs/namenode \
     && mkdir -p /home/hadoop/hadoopdata/hdfs/datanode \
     && mkdir -p /home/hadoop/hadoopdata/hdfs/journalnode
-
+    
 # Copy configuration files
-COPY config/core-site.xml /home/hadoop/hadoop/etc/hadoop/core-site.xml
-COPY config/hdfs-site.xml /home/hadoop/hadoop/etc/hadoop/hdfs-site.xml
-COPY config/mapred-site.xml /home/hadoop/hadoop/etc/hadoop/mapred-site.xml
-COPY config/yarn-site.xml /home/hadoop/hadoop/etc/hadoop/yarn-site.xml
+COPY config/ /home/hadoop/hadoop/etc/hadoop/
 COPY config/zoo.cfg /home/hadoop/zookeeper/conf/zoo.cfg
 
 
