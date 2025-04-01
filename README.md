@@ -119,7 +119,7 @@ hdfs dfs -ls /test
 
 #### 2. Run a MapReduce job:
 ```bash
-hadoop distcp /test/* /
+hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 16 1000
 ```
 
 #### 3. Check YARN applications:
