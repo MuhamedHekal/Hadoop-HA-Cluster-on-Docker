@@ -14,12 +14,36 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
-<!-- Put site-specific property overrides in this file. -->
+<!-- 
+  Core Hadoop configuration file that defines fundamental system behaviors.
+  These settings apply across the entire Hadoop ecosystem.
+-->
 
 <configuration>
 
+  <!-- 
+    The single most important configuration in Hadoop.
+    Defines the default filesystem scheme and authority.
+  -->
   <property>
     <name>fs.defaultFS</name>
     <value>hdfs://mycluster</value>
+    <description>
+      [1] The URI scheme and authority for the default filesystem.
+      
+      [2] In HA configurations, this should point to the logical nameservice ID 
+          (defined in hdfs-site.xml) rather than a specific NameNode.
+      
+      [3] Format options:
+          - Standalone: hdfs://namenode-host:port
+          - HA Cluster: hdfs://nameservice-id
+          - Local FS: file:///
+          - S3: s3a://bucket-name
+      
+      [4] All Hadoop components and clients will use this as their root filesystem
+          unless overridden for specific operations.
+      
+      [5] Must match the dfs.nameservices value in hdfs-site.xml for HA setups.
+    </description>
   </property>
 </configuration>
