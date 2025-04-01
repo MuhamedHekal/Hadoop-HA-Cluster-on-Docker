@@ -14,27 +14,83 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
-<!-- Put site-specific property overrides in this file. -->
+<!-- 
+  MapReduce configuration file for Hadoop.
+  Controls execution environment and framework behavior for MapReduce jobs.
+-->
 
 <configuration>
-<property>
-      <name>yarn.app.mapreduce.am.env</name>
-      <value>HADOOP_MAPRED_HOME=/home/hadoop/hadoop</value>
-   </property>
-   <property>
-      <name>mapreduce.map.env</name>
-      <value>HADOOP_MAPRED_HOME=/home/hadoop/hadoop</value>
-   </property>
-   <property>
-      <name>mapreduce.reduce.env</name>
-      <value>HADOOP_MAPRED_HOME=/home/hadoop/hadoop</value>
-   </property>
-   <property>
-      <name>mapreduce.application.classpath</name>
-      <value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*</value>
-   </property>
-   <property>
-      <name>mapreduce.framework.name</name>
-      <value>yarn</value>
-   </property>
+
+  <!-- Environment Variables Configuration -->
+  <property>
+    <name>yarn.app.mapreduce.am.env</name>
+    <value>HADOOP_MAPRED_HOME=/home/hadoop/hadoop</value>
+    <description>
+      [1] Environment variables for the MapReduce Application Master container.
+      [2] Sets HADOOP_MAPRED_HOME to point to Hadoop installation directory.
+      [3] Required for locating MapReduce binaries and libraries in YARN mode.
+    </description>
+  </property>
+
+  <property>
+    <name>mapreduce.map.env</name>
+    <value>HADOOP_MAPRED_HOME=/home/hadoop/hadoop</value>
+    <description>
+      [1] Environment variables for Map tasks.
+      [2] Ensures map tasks can locate Hadoop installation.
+      [3] Inherited by all mapper processes.
+    </description>
+  </property>
+
+  <property>
+    <name>mapreduce.reduce.env</name>
+    <value>HADOOP_MAPRED_HOME=/home/hadoop/hadoop</value>
+    <description>
+      [1] Environment variables for Reduce tasks.
+      [2] Ensures reduce tasks can locate Hadoop installation.
+      [3] Inherited by all reducer processes.
+    </description>
+  </property>
+
+  <!-- Classpath Configuration -->
+  <property>
+    <name>mapreduce.application.classpath</name>
+    <value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*</value>
+    <description>
+      [1] Defines the classpath for MapReduce applications.
+      [2] Includes:
+          - Core MapReduce JARs
+          - Library dependencies
+      [3] Uses HADOOP_MAPRED_HOME variable for path resolution.
+      [4] Colon (:) separates multiple path entries (Unix-style).
+    </description>
+  </property>
+
+  <!-- Execution Framework -->
+  <property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+    <description>
+      [1] Determines execution framework for MapReduce jobs.
+      [2] 'yarn' - Run on YARN (distributed mode)
+      [3] 'local' - Run locally (for testing)
+      [4] Must be set to 'yarn' for cluster deployment.
+    </description>
+  </property>
+
+  <!-- 
+    Example additional properties (commented out):
+    <property>
+      <name>mapreduce.map.memory.mb</name>
+      <value>2048</value>
+      <description>Memory allocation for map tasks</description>
+    </property>
+    
+    <property>
+      <name>mapreduce.reduce.memory.mb</name>
+      <value>4096</value>
+      <description>Memory allocation for reduce tasks</description>
+    </property>
+  -->
+
 </configuration>
