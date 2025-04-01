@@ -13,89 +13,180 @@
   See the License for the specific language governing permissions and
   limitations under the License. See accompanying LICENSE file.
 -->
-
-<!-- Put site-specific property overrides in this file. -->
-
 <configuration>
-    
+    <!-- Basic HDFS Configuration -->
     <property>
         <name>dfs.replication</name>
         <value>1</value>
-    </property>
-    <property>
-        <name>dfs.namenode.name.dir</name>
-        <value>file:///home/hadoop/hadoopdata/hdfs/namenode</value>
-    </property>
-    <property>
-        <name>dfs.datanode.data.dir</name>
-        <value>file:///home/hadoop/hadoopdata/hdfs/datanode</value>
-    </property>
-    <property>
-      <name>dfs.nameservices</name>
-      <value>mycluster</value>
-    </property>
-
-    <property>
-      <name>dfs.ha.namenodes.mycluster</name>
-      <value>nn1,nn2,nn3</value>
-    </property>
-    <property>
-      <name>dfs.namenode.rpc-address.mycluster.nn1</name>
-      <value>Master1:8020</value>
-    </property>
-    <property>
-      <name>dfs.namenode.rpc-address.mycluster.nn2</name>
-      <value>Master2:8020</value>
-    </property>
-    <property>
-      <name>dfs.namenode.rpc-address.mycluster.nn3</name>
-      <value>Master3:8020</value>
-    </property>
-    <property>
-      <name>dfs.namenode.http-address.mycluster.nn1</name>
-      <value>Master1:9870</value>
-    </property>
-    <property>
-      <name>dfs.namenode.http-address.mycluster.nn2</name>
-      <value>Master2:9870</value>
-    </property>
-    <property>
-      <name>dfs.namenode.http-address.mycluster.nn3</name>
-      <value>Master3:9870</value>
-    </property>
-    <property>
-      <name>dfs.namenode.shared.edits.dir</name>
-      <value>qjournal://Master1:8485;Master2:8485;Master3:8485/mycluster</value>
-    </property>
-    <property>
-      <name>dfs.journalnode.edits.dir</name>
-      <value>/home/hadoop/hadoopdata/hdfs/journalnode</value>
-    </property>
-    <property>
-      <name>dfs.client.failover.proxy.provider.mycluster</name>
-      <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
-    </property>
-    <property>
-      <name>dfs.ha.fencing.methods</name>
-      <value>shell(/bin/true)</value>
-    </property>
-
-    <property>
-      <name>dfs.ha.fencing.ssh.private-key-files</name>
-      <value>/home/hadoop/.ssh/id_rsa</value>
+        <description>
+            Default block replication factor. 
+            Number of copies of each block stored across the cluster.
+            For production, recommend 3. Here set to 1 for development.
+        </description>
     </property>
     
     <property>
-      <name>dfs.ha.nn.not-become-active-in-safemode</name>
-      <value>true</value>
+        <name>dfs.namenode.name.dir</name>
+        <value>file:///home/hadoop/hadoopdata/hdfs/namenode</value>
+        <description>
+            Path on the local filesystem where NameNode stores namespace 
+            and transaction logs. Multiple directories can be specified.
+        </description>
+    </property>
+    
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file:///home/hadoop/hadoopdata/hdfs/datanode</value>
+        <description>
+            Path on the local filesystem where DataNode stores blocks.
+            Multiple directories can be specified for different disks.
+        </description>
+    </property>
+    
+    <property>
+        <name>dfs.namenode.heartbeat.recheck-interval</name>
+        <value>60000</value> <!-- 1 minute instead of default 5 -->
+        <!--Timeout = 2 * dfs.namenode.heartbeat.recheck-interval + 10 * dfs.heartbeat.interval-->
+        <description>
+            Interval (in milliseconds) for NameNode to recheck dead DataNodes.
+            Combined with dfs.heartbeat.interval determines failure detection time.
+            Lower values detect failures faster but increase NameNode load.
+        </description>
+    </property>
+
+    <!-- High Availability Configuration -->
+    <property>
+        <name>dfs.nameservices</name>
+        <value>mycluster</value>
+        <description>
+            Logical name for this HDFS nameservice.
+            Used to identify the HA cluster configuration.
+        </description>
     </property>
 
     <property>
-    <name>dfs.ha.automatic-failover.enabled</name>
-    <value>true</value>
+        <name>dfs.ha.namenodes.mycluster</name>
+        <value>nn1,nn2,nn3</value>
+        <description>
+            Unique identifiers for each NameNode in the HA cluster.
+            Must match the suffixes used in other HA properties.
+        </description>
     </property>
+
+    <!-- NameNode RPC Addresses -->
+    <property>
+        <name>dfs.namenode.rpc-address.mycluster.nn1</name>
+        <value>Master1:8020</value>
+        <description>
+            RPC address for client communication with nn1.
+            Used for HDFS metadata operations.
+        </description>
+    </property>
+    <property>
+        <name>dfs.namenode.rpc-address.mycluster.nn2</name>
+        <value>Master2:8020</value>
+        <description>RPC address for nn2.</description>
+    </property>
+    <property>
+        <name>dfs.namenode.rpc-address.mycluster.nn3</name>
+        <value>Master3:8020</value>
+        <description>RPC address for nn3.</description>
+    </property>
+
+    <!-- NameNode HTTP Addresses -->
+    <property>
+        <name>dfs.namenode.http-address.mycluster.nn1</name>
+        <value>Master1:9870</value>
+        <description>
+            Web UI address for nn1.
+            Used for monitoring and administration.
+        </description>
+    </property>
+    <property>
+        <name>dfs.namenode.http-address.mycluster.nn2</name>
+        <value>Master2:9870</value>
+        <description>Web UI address for nn2.</description>
+    </property>
+    <property>
+        <name>dfs.namenode.http-address.mycluster.nn3</name>
+        <value>Master3:9870</value>
+        <description>Web UI address for nn3.</description>
+    </property>
+
+    <!-- JournalNode Configuration -->
+    <property>
+        <name>dfs.namenode.shared.edits.dir</name>
+        <value>qjournal://Master1:8485;Master2:8485;Master3:8485/mycluster</value>
+        <description>
+            Quorum Journal Manager (QJM) URI for shared edits directory.
+            JournalNodes must form a quorum (typically 3 or more).
+            Ensures edit logs are synchronized across NameNodes.
+        </description>
+    </property>
+    
+    <property>
+        <name>dfs.journalnode.edits.dir</name>
+        <value>/home/hadoop/hadoopdata/hdfs/journalnode</value>
+        <description>
+            Path on JournalNode machines where edit logs are stored.
+            Should be on durable storage.
+        </description>
+    </property>
+
+    <!-- Failover Configuration -->
+    <property>
+        <name>dfs.client.failover.proxy.provider.mycluster</name>
+        <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+        <description>
+            Java class that clients use to contact the active NameNode.
+            Automatically fails over to standby when needed.
+        </description>
+    </property>
+    
+    <property>
+        <name>dfs.ha.fencing.methods</name>
+        <value>shell(/bin/true)</value>
+        <description>
+            Fencing method to prevent split-brain scenarios.
+            This simple method just returns true (not production-safe).
+            For production, use SSH fencing or a real fencing method.
+        </description>
+    </property>
+    
+    <property>
+        <name>dfs.ha.fencing.ssh.private-key-files</name>
+        <value>/home/hadoop/.ssh/id_rsa</value>
+        <description>
+            Path to SSH private key if using SSH fencing.
+            Must be configured for secure fencing methods.
+        </description>
+    </property>
+    
+    <property>
+        <name>dfs.ha.nn.not-become-active-in-safemode</name>
+        <value>true</value>
+        <description>
+            Prevents NameNode from becoming active while in safemode.
+            Important safety check during failover scenarios.
+        </description>
+    </property>
+
+    <!-- ZooKeeper Configuration -->
+    <property>
+        <name>dfs.ha.automatic-failover.enabled</name>
+        <value>true</value>
+        <description>
+            Enables automatic failover using ZooKeeper.
+            Requires ZooKeeper ensemble to be properly configured.
+        </description>
+    </property>
+    
     <property>
         <name>ha.zookeeper.quorum</name>
         <value>Master1:2181,Master2:2181,Master3:2181</value>
+        <description>
+            ZooKeeper server addresses for automatic failover.
+            Should match your ZooKeeper ensemble configuration.
+        </description>
     </property>
 </configuration>
