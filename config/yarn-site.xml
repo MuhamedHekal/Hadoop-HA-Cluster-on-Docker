@@ -1,66 +1,135 @@
 <?xml version="1.0"?>
 <!--
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License. See accompanying LICENSE file.
+  YARN ResourceManager and NodeManager configuration
+  Controls resource management and job scheduling in Hadoop
 -->
 <configuration>
 
+  <!-- NodeManager Auxiliary Services -->
   <property>
     <name>yarn.nodemanager.aux-services</name>
     <value>mapreduce_shuffle</value>
+    <description>
+      [1] Defines auxiliary services needed by NodeManager
+      [2] 'mapreduce_shuffle' enables shuffle capability for MapReduce
+      [3] Required for MapReduce v2 (YARN) operation
+      [4] Multiple services can be comma-separated
+    </description>
   </property>
+
+  <!-- Log Aggregation -->
   <property>
     <name>yarn.log-aggregation-enable</name>
     <value>true</value>
+    <description>
+      [1] Enables collection of container logs after job completion
+      [2] Aggregated logs are stored in HDFS for centralized access
+      [3] Essential for debugging completed applications
+    </description>
   </property>
+
+  <!-- ResourceManager HA Configuration -->
   <property>
     <name>yarn.resourcemanager.ha.enabled</name>
     <value>true</value>
+    <description>
+      [1] Enables ResourceManager High Availability
+      [2] Requires multiple RMs configured in the cluster
+      [3] Automatic failover handled by ZooKeeper
+    </description>
   </property>
+
   <property>
     <name>yarn.resourcemanager.cluster-id</name>
     <value>mycluster</value>
+    <description>
+      [1] Logical identifier for the YARN cluster
+      [2] Must match across all ResourceManager instances
+      [3] Used in HA configuration and client connections
+    </description>
   </property>
+
   <property>
     <name>yarn.resourcemanager.ha.rm-ids</name>
     <value>rm1,rm2,rm3</value>
+    <description>
+      [1] Comma-separated list of ResourceManager IDs
+      [2] Each ID must have corresponding hostname configuration
+      [3] Defines all RM instances in the HA cluster
+    </description>
   </property>
+
+  <!-- ResourceManager Host Configurations -->
   <property>
     <name>yarn.resourcemanager.hostname.rm1</name>
     <value>master1</value>
+    <description>
+      [1] Physical hostname for ResourceManager ID 'rm1'
+      [2] Must match container hostname in docker-compose
+      [3] Used for internal RPC communication
+    </description>
   </property>
+
   <property>
     <name>yarn.resourcemanager.hostname.rm2</name>
     <value>master2</value>
+    <description>Physical hostname for ResourceManager ID 'rm2'</description>
   </property>
+
   <property>
     <name>yarn.resourcemanager.hostname.rm3</name>
     <value>master3</value>
+    <description>Physical hostname for ResourceManager ID 'rm3'</description>
   </property>
+
+  <!-- Web Application Addresses -->
   <property>
     <name>yarn.resourcemanager.webapp.address.rm1</name>
     <value>master1:8088</value>
+    <description>
+      [1] HTTP web UI address for rm1
+      [2] Used for monitoring and administration
+      [3] Must match exposed port in docker-compose
+    </description>
   </property>
+
   <property>
     <name>yarn.resourcemanager.webapp.address.rm2</name>
     <value>master2:8088</value>
+    <description>HTTP web UI address for rm2</description>
   </property>
+
   <property>
     <name>yarn.resourcemanager.webapp.address.rm3</name>
     <value>master3:8088</value>
+    <description>HTTP web UI address for rm3</description>
   </property>
+
+  <!-- ZooKeeper Configuration -->
   <property>
     <name>hadoop.zk.address</name>
     <value>master1:2181,master2:2181,master3:2181</value>
+    <description>
+      [1] ZooKeeper quorum addresses for RM state store
+      [2] Required for ResourceManager HA
+      [3] Must match ZooKeeper ensemble configuration
+      [4] Format: host1:port,host2:port,host3:port
+    </description>
   </property>
+
+  <!-- 
+    Example Additional Properties (commented out):
+    <property>
+      <name>yarn.nodemanager.resource.memory-mb</name>
+      <value>8192</value>
+      <description>Total allocatable memory per NodeManager</description>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.maximum-allocation-mb</name>
+      <value>4096</value>
+      <description>Maximum memory allocation per container</description>
+    </property>
+  -->
 
 </configuration>
