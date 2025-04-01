@@ -63,4 +63,4 @@ COPY config/ /home/hadoop/hadoop/etc/hadoop/
 COPY config/zoo.cfg /home/hadoop/zookeeper/conf/zoo.cfg
 
 
-ENTRYPOINT [ "bash", "/home/hadoop/entrypoint.sh" ]
+ENTRYPOINT [ "bash", "/home/hadoop/hadoop/etc/hadoop/entrypoint.sh" ]
