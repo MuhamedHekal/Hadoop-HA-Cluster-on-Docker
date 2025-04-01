@@ -12,7 +12,6 @@ services:
       - master1-journalnode:/home/hadoop/hadoopdata/hdfs/journalnode
       - master1-namenode:/home/hadoop/hadoopdata/hdfs/namenode
       - master1-zookeeper:/home/hadoop/zookeeper/data
-      - ./config/entrypoint.sh:/home/hadoop/entrypoint.sh
     environment:
       - MYID=1
       - ROLE=master
@@ -33,7 +32,6 @@ services:
       - master2-journalnode:/home/hadoop/hadoopdata/hdfs/journalnode
       - master2-namenode:/home/hadoop/hadoopdata/hdfs/namenode
       - master2-zookeeper:/home/hadoop/zookeeper/data
-      - ./config/entrypoint.sh:/home/hadoop/entrypoint.sh
     environment:
       - MYID=2
       - ROLE=master
@@ -54,7 +52,6 @@ services:
       - master3-journalnode:/home/hadoop/hadoopdata/hdfs/journalnode
       - master3-namenode:/home/hadoop/hadoopdata/hdfs/namenode
       - master3-zookeeper:/home/hadoop/zookeeper/data
-      - ./config/entrypoint.sh:/home/hadoop/entrypoint.sh
     environment:
       - MYID=3
       - ROLE=master
@@ -70,7 +67,6 @@ services:
     container_name: worker1
     volumes:
       - worker1-datanode:/home/hadoop/hadoopdata/hdfs/datanode
-      - ./config/entrypoint.sh:/home/hadoop/entrypoint.sh
     environment:
       - ROLE=worker
     healthcheck:
