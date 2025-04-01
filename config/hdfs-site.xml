@@ -26,12 +26,10 @@
         <name>dfs.namenode.name.dir</name>
         <value>file:///home/hadoop/hadoopdata/hdfs/namenode</value>
     </property>
-    <!--
     <property>
         <name>dfs.datanode.data.dir</name>
         <value>file:///home/hadoop/hadoopdata/hdfs/datanode</value>
     </property>
-   -->
     <property>
       <name>dfs.nameservices</name>
       <value>mycluster</value>
@@ -77,12 +75,6 @@
       <name>dfs.client.failover.proxy.provider.mycluster</name>
       <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
     </property>
-    <!--
-    <property>
-      <name>dfs.ha.fencing.methods</name>
-      <value>sshfence</value>
-    </property>
-    -->
     <property>
       <name>dfs.ha.fencing.methods</name>
       <value>shell(/bin/true)</value>

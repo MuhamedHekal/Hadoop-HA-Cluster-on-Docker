@@ -19,6 +19,10 @@
     <value>mapreduce_shuffle</value>
   </property>
   <property>
+    <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+  </property>
+  <property>
     <name>yarn.resourcemanager.ha.enabled</name>
     <value>true</value>
   </property>
