@@ -2,6 +2,7 @@
 
 echo $MYID > /home/hadoop/zookeeper/data/myid
 sudo service ssh start
+
 # Run ZooKeeper and JournalNode only on Master nodes
 if [ "$ROLE" == "master" ]; then
     /home/hadoop/zookeeper/bin/zkServer.sh start
@@ -9,11 +10,23 @@ if [ "$ROLE" == "master" ]; then
     sleep 5
 
     if [ "$MYID" -eq 1 ]; then
-        hdfs namenode -format mycluster
-        hdfs --daemon start namenode
-        hdfs zkfc -formatZK
+        # Check if namenode is already formatted
+        if [ ! -f /home/hadoop/hadoopdata/hdfs/namenode/current/VERSION ]; then
+            echo "Formatting NameNode for the first time..."
+            hdfs namenode -format mycluster -force
+            hdfs --daemon start namenode
+            hdfs zkfc -formatZK -force
+        else
+            echo "NameNode already formatted, starting..."
+            hdfs --daemon start namenode
+            hdfs --daemon start zkfc
+        fi
     else
-        hdfs namenode -bootstrapStandby
+        # For standby nodes
+        if [ ! -f /home/hadoop/hadoopdata/hdfs/namenode/current/VERSION ]; then
+            echo "Bootstrapping standby NameNode..."
+            hdfs namenode -bootstrapStandby
+        fi
         hdfs --daemon start namenode
         hdfs --daemon start zkfc
     fi
