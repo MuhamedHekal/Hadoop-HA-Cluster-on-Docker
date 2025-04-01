@@ -46,4 +46,26 @@
       [5] Must match the dfs.nameservices value in hdfs-site.xml for HA setups.
     </description>
   </property>
+
+  <!-- 
+    Example of additional commonly used properties (commented out):
+    <property>
+      <name>hadoop.tmp.dir</name>
+      <value>/home/hadoop/tmp</value>
+      <description>
+        Base directory for temporary Hadoop files.
+        Important for both HDFS and local operations.
+      </description>
+    </property>
+    
+    <property>
+      <name>io.file.buffer.size</name>
+      <value>131072</value>
+      <description>
+        Size of buffer used in sequence files (in bytes).
+        Affects I/O performance.
+      </description>
+    </property>
+  -->
+
 </configuration>
