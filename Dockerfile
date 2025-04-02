@@ -36,7 +36,7 @@ USER hadoop
 WORKDIR /home/hadoop
 
 # Install Hadoop
-RUN wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz && \
+RUN wget https://downloads.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz && \
     tar -xzvf hadoop-3.3.6.tar.gz && \
     mv hadoop-3.3.6 hadoop && \
     rm hadoop-3.3.6.tar.gz
