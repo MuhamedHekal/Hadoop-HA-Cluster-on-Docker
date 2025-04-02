@@ -16,6 +16,7 @@ if [ "$ROLE" == "master" ]; then
             hdfs namenode -format mycluster -force
             hdfs --daemon start namenode
             hdfs zkfc -formatZK -force
+            hdfs --daemon start zkfc
         else
             echo "NameNode already formatted, starting..."
             hdfs --daemon start namenode
