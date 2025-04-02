@@ -14,7 +14,7 @@ services:
       - MYID=1
       - ROLE=master
     healthcheck:
-      test: ["CMD-SHELL", "jps | grep -E 'NameNode|ResourceManager'"]
+      test: ["CMD-SHELL", "jps | grep -E 'QuorumPeerMain|NameNode|DFSZKFailoverController|ResourceManager|JournalNode'"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -34,7 +34,7 @@ services:
       - MYID=2
       - ROLE=master
     healthcheck:
-      test: ["CMD-SHELL", "jps | grep -E 'NameNode|ResourceManager'"]
+      test: ["CMD-SHELL", "jps | grep -E 'QuorumPeerMain|NameNode|DFSZKFailoverController|ResourceManager|JournalNode'"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -54,7 +54,7 @@ services:
       - MYID=3
       - ROLE=master
     healthcheck:
-      test: ["CMD-SHELL", "jps | grep -E 'NameNode|ResourceManager'"]
+      test: ["CMD-SHELL", "jps | grep -E 'QuorumPeerMain|NameNode|DFSZKFailoverController|ResourceManager|JournalNode'"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -68,7 +68,7 @@ services:
     environment:
       - ROLE=worker
     healthcheck:
-      test: ["CMD", "ls", "/home/hadoop/hadoopdata/hdfs/datanode"]
+      test: ["CMD-SHELL", "jps | grep -E 'DataNode|NodeManager'"]
       interval: 30s
       timeout: 10s
       retries: 5
