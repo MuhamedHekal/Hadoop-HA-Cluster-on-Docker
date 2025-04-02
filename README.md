@@ -60,9 +60,9 @@ A Dockerized Hadoop cluster with High Availability (HA) configuration, featuring
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/MuhamedHekal/Hadoop-Cluster-with-High-Availability-HA.git
+   git clone https://github.com/MuhamedHekal/Hadoop-HA-Cluster-on-Docker.git
    
-   cd Hadoop-Cluster-with-High-Availability-HA
+   cd Hadoop-HA-Cluster-on-Docker
    ```
 
 2.  **Build and start the cluster**:
@@ -153,7 +153,7 @@ The cluster uses Docker volumes to persist:
 
 Each container has health checks to verify critical services are running:
 
-- **Masters**: Checks for NameNode and ResourceManager processes
-- **Workers**: Verifies DataNode directory exists
+- **Masters**: Checks for QuorumPeerMain, NameNode, DFSZKFailoverController, ResourceManager, and JournalNode processes
+- **Workers**: Checks for DataNode, and NodeManager processes
 
 
