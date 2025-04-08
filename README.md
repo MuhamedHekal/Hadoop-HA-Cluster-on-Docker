@@ -135,7 +135,7 @@ yarn application -list
 
 ## Add Additional Worker Nodes
 ```
-docker container run --name worker2 -h worker2 --network hadoop-cluster_default -e ROLE=worker -v Worker2-datanode:/home/hadoop/hadoopdata/hdfs/datanode hadoop-cluster-worker1
+docker container run --name worker2 -h worker2 --network hadoop-ha-cluster-on-docker_default -e ROLE=worker -v Worker2-datanode:/home/hadoop/hadoopdata/hdfs/datanode hadoop-ha-cluster-on-docker-worker1
 ```
 
 ## Volumes
