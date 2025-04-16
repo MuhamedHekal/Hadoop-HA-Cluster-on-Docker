@@ -18,8 +18,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    mem_limit: 2g
-    cpus: 1.0
 
   master2:
     build: .
@@ -87,6 +85,22 @@ services:
         condition: service_healthy
     mem_limit: 2g
     cpus: 1.0
+  hive:
+    build: .
+    hostname: hive
+    container_name: hive
+    ports:
+      - "10000:10000" # HiveServer2
+      - "10002:10002" # Hive Metastore
+    environment:
+      - ROLE=hive
+    depends_on:
+      master1:
+        condition: service_healthy
+      master2:
+        condition: service_healthy
+      master3:
+        condition: service_healthy
 volumes:
   master1-journalnode:
   master1-namenode:

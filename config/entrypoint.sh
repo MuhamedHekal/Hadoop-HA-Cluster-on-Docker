@@ -41,4 +41,13 @@ if [ "$ROLE" == "worker" ]; then
     yarn --daemon start nodemanager
 fi
 
+if [ "$ROLE" == "hive" ]; then
+    hadoop fs -mkdir /tmp
+    hadoop fs -chmod g+w /tmp
+    hadoop fs -mkdir -p /user/hive/warehouse
+    hadoop fs -chmod g+w /user/hive/warehouse
+    schematool -dbType derby -initSchema
+    hiveserver2 &
+fi
+
 tail -f /dev/null

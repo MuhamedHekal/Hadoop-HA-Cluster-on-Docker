@@ -46,7 +46,22 @@
       [5] Must match the dfs.nameservices value in hdfs-site.xml for HA setups.
     </description>
   </property>
-
+  <property>
+    <name>hadoop.proxyuser.hadoop.groups</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.hadoop.hosts</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.server.hosts</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.server.groups</name>
+    <value>*</value>
+  </property>
   <!-- 
     Example of additional commonly used properties (commented out):
     <property>

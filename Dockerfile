@@ -48,6 +48,14 @@ RUN wget https://archive.apache.org/dist/zookeeper/zookeeper-3.6.4/apache-zookee
     rm apache-zookeeper-3.6.4-bin.tar.gz && \
     mkdir -p zookeeper/data
 
+# install Hive
+ENV HIVE_HOME=/home/hadoop/hive
+ENV PATH=$PATH:$HIVE_HOME/bin
+RUN wget https://archive.apache.org/dist/hive/hive-3.1.3/apache-hive-3.1.3-bin.tar.gz && \
+tar -xzf apache-hive-3.1.3-bin.tar.gz && \
+mv apache-hive-3.1.3-bin hive && \
+rm apache-hive-3.1.3-bin.tar.gz
+
 # Configure SSH
 RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
