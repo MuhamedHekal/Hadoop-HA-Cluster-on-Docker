@@ -41,12 +41,33 @@ if [ "$ROLE" == "worker" ]; then
     yarn --daemon start nodemanager
 fi
 
-if [ "$ROLE" == "hive" ]; then
-    hadoop fs -mkdir /tmp
-    hadoop fs -chmod g+w /tmp
-    hadoop fs -mkdir -p /user/hive/warehouse
-    hadoop fs -chmod g+w /user/hive/warehouse
-    schematool -dbType derby -initSchema
+if [ "$ROLE" = "hive" ]; then
+    # Check if /tmp exists (hadoop fs -test returns 0 if exists)
+    hadoop fs -test -d /tmp
+    if [ $? -ne 0 ]; then
+        echo "Creating /tmp directory..."
+        hadoop fs -mkdir /tmp || { echo "Failed to create /tmp"; exit 1; }
+        hadoop fs -chmod g+w /tmp || { echo "Failed to chmod /tmp"; exit 1; }
+    fi
+
+    # Check if warehouse directory exists
+    hadoop fs -test -d /user/hive/warehouse
+    if [ $? -ne 0 ]; then
+        echo "Creating warehouse directory..."
+        hadoop fs -mkdir -p /user/hive/warehouse || { echo "Failed to create warehouse directory"; exit 1; }
+        hadoop fs -chmod g+w /user/hive/warehouse || { echo "Failed to chmod warehouse directory"; exit 1; }
+    fi
+
+    if [ ! -f "/home/hadoop/metastore_db/db.lck" ]; then
+        
+        echo "Initializing Derby metastore..."
+        schematool -dbType derby -initSchema || { echo "Failed to initialize Derby schema"; exit 1; }
+    else
+        echo "Derby metastore already exists (metastore_db directory found)"
+    fi
+
+    # Start HiveServer2
+    echo "Starting HiveServer2..."
     hiveserver2 &
 fi
 
