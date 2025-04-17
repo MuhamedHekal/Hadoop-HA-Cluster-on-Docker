@@ -56,6 +56,18 @@ tar -xzf apache-hive-3.1.3-bin.tar.gz && \
 mv apache-hive-3.1.3-bin hive && \
 rm apache-hive-3.1.3-bin.tar.gz
 
+# Install Tez
+RUN wget https://dlcdn.apache.org/tez/0.9.2/apache-tez-0.9.2-bin.tar.gz && \
+    tar -xzf apache-tez-0.9.2-bin.tar.gz && \
+    mv apache-tez-0.9.2-bin tez && \
+    rm apache-tez-0.9.2-bin.tar.gz
+
+ENV TEZ_HOME=/home/hadoop/tez
+ENV PATH=$PATH:$TEZ_HOME/bin
+ENV TEZ_CONF_DIR=$TEZ_HOME/conf
+ENV TEZ_JARS=$TEZ_HOME/*:$TEZ_HOME/lib/*
+ENV HADOOP_CLASSPATH=$TEZ_CONF_DIR:$TEZ_JARS
+
 # Configure SSH
 RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
@@ -69,6 +81,8 @@ RUN mkdir -p /home/hadoop/hadoopdata/hdfs/namenode \
 # Copy configuration files
 COPY config/ /home/hadoop/hadoop/etc/hadoop/
 COPY config/zoo.cfg /home/hadoop/zookeeper/conf/zoo.cfg
+COPY config/hive-site.xml /home/hadoop/hive/conf/hive-site.xml
+COPY config/tez-site.xml /home/hadoop/tez/conf/tez-site.xml
 
 
 ENTRYPOINT [ "bash", "/home/hadoop/hadoop/etc/hadoop/entrypoint.sh" ]
