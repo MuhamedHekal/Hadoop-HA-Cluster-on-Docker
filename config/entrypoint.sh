@@ -59,8 +59,11 @@ if [ "$ROLE" = "hive" ]; then
     fi
 
     if [ ! -f "/home/hadoop/metastore_db/db.lck" ]; then
-        
         echo "Initializing Derby metastore..."
+        if [ ! -f "/home/hadoop/hive-metastore" ]; then
+            # Create a symbolic link to the metastore_db directory
+            sudo ln -s /home/hadoop/metastore_db /home/hadoop/hive-metastore
+        fi
         schematool -dbType derby -initSchema || { echo "Failed to initialize Derby schema"; exit 1; }
     else
         echo "Derby metastore already exists (metastore_db directory found)"
