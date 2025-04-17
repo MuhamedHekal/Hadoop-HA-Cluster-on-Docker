@@ -54,8 +54,8 @@ if [ "$ROLE" = "hive" ]; then
     hadoop fs -test -d /user/hive/warehouse
     if [ $? -ne 0 ]; then
         echo "Creating warehouse directory..."
-        hadoop fs -mkdir -p /user/hive/warehouse || { echo "Failed to create warehouse directory"; exit 1; }
-        hadoop fs -chmod g+w /user/hive/warehouse || { echo "Failed to chmod warehouse directory"; exit 1; }
+        hadoop fs -mkdir -p /user/hive/warehouse ||  echo "Failed to create warehouse directory"
+        hadoop fs -chmod g+w /user/hive/warehouse || echo "Failed to chmod warehouse directory"
     fi
 
     if [ ! -f "/home/hadoop/metastore_db/db.lck" ]; then
@@ -64,14 +64,29 @@ if [ "$ROLE" = "hive" ]; then
             # Create a symbolic link to the metastore_db directory
             sudo ln -s /home/hadoop/metastore_db /home/hadoop/hive-metastore
         fi
-        schematool -dbType derby -initSchema || { echo "Failed to initialize Derby schema"; exit 1; }
+        sleep 5
+        schematool -dbType derby -initSchema || echo "Failed to initialize Derby schema";
     else
         echo "Derby metastore already exists (metastore_db directory found)"
     fi
 
-    # Start HiveServer2
-    echo "Starting HiveServer2..."
-    hiveserver2 &
+    # configure Hive to use TEZ
+    echo "Configuring Hive to use TEZ..."
+    hadoop fs -test -d /tez
+    if [ $? -ne 0 ]; then
+        echo "Creating /tez directory..."
+        hadoop fs -mkdir /tez || echo "Failed to create /tez"
+        hdfs dfs -chmod -R 755 /tez ||  echo "Failed to chmod /tez"
+    fi
+    
+    # Check if tez.tar.gz exists in HDFS
+    hadoop fs -test -f /tez/tez.tar.gz
+    if [ $? -ne 0 ]; then
+        echo "Uploading Tez libraries to HDFS..."
+        hdfs dfs -put tez/share/tez.tar.gz  /tez/tez.tar.gz || echo "Failed to upload Tez libs" 
+    
+    fi
+
 fi
 
 tail -f /dev/null
