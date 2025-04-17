@@ -3,4 +3,8 @@
         <name>hive.execution.engine</name>
         <value>tez</value>
     </property>
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:derby:metastore_db;create=true</value>
+  </property>
 </configuration>
