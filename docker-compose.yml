@@ -87,11 +87,10 @@ services:
     cpus: 1.0
   hive:
     build: .
-    hostname: hive
-    container_name: hive
+    hostname: hive-server
+    container_name: hive-server
     ports:
-      - "10000:10000" # HiveServer2
-      - "10002:10002" # Hive Metastore
+      - "10002:10002" # HiveServer2
     volumes:
       - hive-metastore:/home/hadoop/hive-metastore
     environment:
@@ -103,6 +102,42 @@ services:
         condition: service_healthy
       master3:
         condition: service_healthy
+      metastore-service:
+        condition: service_healthy
+    
+  metastore-service:
+    build: .
+    hostname: metastore-service
+    container_name: metastore-service
+    ports:
+      - "10002:10002" # Hive Metastore
+    environment:
+      - ROLE=metastore_service
+    depends_on:
+      master1:
+        condition: service_healthy
+      master2:
+        condition: service_healthy
+      master3:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "jps | grep -E 'RunJar'"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+  metastore-postgres:
+    image: postgres
+    hostname: metastore_postgres
+    container_name: metastore_postgres
+    volumes:
+      - hive-metastore:/var/lib/postgresql/data
+    ports:
+      - 5432:5432 #postgres port
+    environment:
+      - ROLE=metastore_postgres
+      - POSTGRES_PASSWORD=p@ssw0rd
+
+
 volumes:
   master1-journalnode:
   master1-namenode:
