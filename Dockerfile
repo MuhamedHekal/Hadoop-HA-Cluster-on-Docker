@@ -52,9 +52,10 @@ RUN wget https://archive.apache.org/dist/zookeeper/zookeeper-3.6.4/apache-zookee
 ENV HIVE_HOME=/home/hadoop/hive
 ENV PATH=$PATH:$HIVE_HOME/bin
 RUN wget https://archive.apache.org/dist/hive/hive-3.1.3/apache-hive-3.1.3-bin.tar.gz && \
-tar -xzf apache-hive-3.1.3-bin.tar.gz && \
-mv apache-hive-3.1.3-bin hive && \
-rm apache-hive-3.1.3-bin.tar.gz
+    tar -xzf apache-hive-3.1.3-bin.tar.gz && \
+    mv apache-hive-3.1.3-bin hive && \
+    rm apache-hive-3.1.3-bin.tar.gz && \
+    wget -O /home/hadoop/hive/lib/postgresql-42.5.4.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.5.4/postgresql-42.5.4.jar
 
 # Install Tez
 RUN wget https://dlcdn.apache.org/tez/0.9.2/apache-tez-0.9.2-bin.tar.gz && \
