@@ -58,17 +58,9 @@ if [ "$ROLE" = "hive" ]; then
         hadoop fs -chmod g+w /user/hive/warehouse || echo "Failed to chmod warehouse directory"
     fi
 
-    if [ ! -f "/home/hadoop/metastore_db/db.lck" ]; then
-        echo "Initializing Derby metastore..."
-        if [ ! -f "/home/hadoop/hive-metastore" ]; then
-            # Create a symbolic link to the metastore_db directory
-            sudo ln -s /home/hadoop/metastore_db /home/hadoop/hive-metastore
-        fi
-        sleep 5
-        schematool -dbType derby -initSchema || echo "Failed to initialize Derby schema";
-    else
-        echo "Derby metastore already exists (metastore_db directory found)"
-    fi
+   
+    #schematool -dbType postgres -initSchema || echo "Failed to initialize postgres schema";
+    
 
     # configure Hive to use TEZ
     echo "Configuring Hive to use TEZ..."
@@ -87,6 +79,15 @@ if [ "$ROLE" = "hive" ]; then
     
     fi
 
+    hive --service hiveserver2 &
+
 fi
+
+if [ "$ROLE" = "metastore_service" ]; then
+    schematool -dbType postgres -initSchema
+    hive --service metastore &
+    sleep 5
+fi
+
 
 tail -f /dev/null
