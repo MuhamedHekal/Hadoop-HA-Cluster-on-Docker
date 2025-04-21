@@ -90,7 +90,7 @@ services:
     hostname: hive-server
     container_name: hive-server
     ports:
-      - "10002:10002" # HiveServer2
+      - "10000:10000" # HiveServer2
     volumes:
       - hive-metastore:/home/hadoop/hive-metastore
     environment:
