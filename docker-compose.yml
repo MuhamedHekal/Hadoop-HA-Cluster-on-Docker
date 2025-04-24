@@ -136,7 +136,22 @@ services:
     environment:
       - ROLE=metastore_postgres
       - POSTGRES_PASSWORD=p@ssw0rd
-
+  sqoop:
+    build: .
+    hostname: sqoop
+    container_name: sqoop
+    ports:
+      - "12000:12000" # Sqoop Server
+    environment:
+      - ROLE=sqoop
+    depends_on:
+      master1:
+        condition: service_healthy
+      master2:
+        condition: service_healthy
+      master3:
+        condition: service_healthy
+    
 
 volumes:
   master1-journalnode:
