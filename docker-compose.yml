@@ -38,8 +38,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    mem_limit: 1.5g
-    cpus: 1.0
 
   master3:
     build: .
@@ -60,8 +58,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    mem_limit: 1.5g
-    cpus: 0.75
 
   worker1:
     build: .
@@ -83,8 +79,6 @@ services:
         condition: service_healthy
       master3:
         condition: service_healthy
-    mem_limit: 2g
-    cpus: 1.0
   hive:
     build: .
     hostname: hive-server
@@ -93,6 +87,9 @@ services:
       - "10000:10000" # HiveServer2
     volumes:
       - hive-metastore:/home/hadoop/hive-metastore
+      - ./migration/hive-DDL.sql:/home/hadoop/hive-DDL.sql # create schema with tables in hive 
+      - ./migration/tmp-DDL.sql:/home/hadoop/tmp-DDL.sql # tmp schema for hive passes to migrated files
+      - ./migration/insert-into-hive-schema.sql:/home/hadoop/insert-into-hive-schema.sql # HQL script to insert data into hive tables
     environment:
       - ROLE=hive
     depends_on:
@@ -144,6 +141,8 @@ services:
       - "12000:12000" # Sqoop Server
     environment:
       - ROLE=sqoop
+    volumes:
+      - ./migration/migration.sh:/home/hadoop/migration.sh # script to run sqoop import from oracle to HDFS
     depends_on:
       master1:
         condition: service_healthy
