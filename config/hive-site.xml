@@ -41,4 +41,41 @@
       <name>datanucleus.autoCreateTables</name>
       <value>True</value>
    </property>
+
+   <!--Hive ACID configuration-->
+   <property>
+      <name>hive.support.concurrency</name>
+      <value>true</value>
+      <description>Enable concurrency (ACID transactions)</description>
+   </property>
+
+   <property>
+      <name>hive.enforce.bucketing</name>
+      <value>true</value>
+      <description>Enforce bucketing (necessary for ACID tables)</description>
+   </property>
+
+   <property>
+      <name>hive.txn.manager</name>
+      <value>org.apache.hadoop.hive.ql.lockmgr.DbTxnManager</value>
+      <description>ACID Transaction Manager</description>
+   </property>
+
+   <property>
+      <name>hive.compactor.initiator.on</name>
+      <value>true</value>
+      <description>Enables the compactor to initiate compactions</description>
+   </property>
+
+   <property>
+      <name>hive.compactor.worker.threads</name>
+      <value>1</value>
+      <description>Number of worker threads to handle compaction</description>
+   </property>
+
+   <property>
+      <name>hive.exec.dynamic.partition.mode</name>
+      <value>nonstrict</value>
+      <description>Allow dynamic partitioning</description>
+   </property>
 </configuration>
