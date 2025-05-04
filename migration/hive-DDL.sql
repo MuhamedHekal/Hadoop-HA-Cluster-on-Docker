@@ -1,9 +1,10 @@
-CREATE DATABASE IF NOT EXISTS airline;USE airline;
+CREATE DATABASE IF NOT EXISTS AirLine;
+USE AirLine;
 -- ========================
 -- Static Dimension Tables (Non-ACID)
 -- ========================
 
-CREATE TABLE IF NOT EXISTS aircraft_dim (
+CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.aircraft_dim (
     aircraft_id INT,
     aircraft_name STRING,
     number_of_seats INT,
@@ -12,7 +13,8 @@ CREATE TABLE IF NOT EXISTS aircraft_dim (
 )
 STORED AS ORC;
 
-CREATE TABLE IF NOT EXISTS airport_dim (
+
+CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.airport_dim (
     airport_id INT,
     airport_code STRING,
     airport_name STRING,
@@ -21,14 +23,16 @@ CREATE TABLE IF NOT EXISTS airport_dim (
 )
 STORED AS ORC;
 
-CREATE TABLE IF NOT EXISTS trip_status_dim (
+
+CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.trip_status_dim (
     status_id INT,
     reservation_status STRING,
     cancellation_reason STRING
 )
 STORED AS ORC;
 
-CREATE TABLE IF NOT EXISTS class_services_dim (
+
+CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.class_services_dim (
     class_of_services_id INT,
     class_purchased STRING,
     class_flown STRING,
@@ -36,7 +40,8 @@ CREATE TABLE IF NOT EXISTS class_services_dim (
 )
 STORED AS ORC;
 
-CREATE TABLE IF NOT EXISTS promotion_dim (
+
+CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.promotion_dim (
     promotion_id INT,
     valid_from DATE,
     valid_to DATE,
@@ -46,15 +51,17 @@ CREATE TABLE IF NOT EXISTS promotion_dim (
 )
 STORED AS ORC;
 
-CREATE TABLE IF NOT EXISTS time_dim (
+
+CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.time_dim (
     time_id TIMESTAMP,
     hour INT,
     minute INT,
+    time_string STRING,
     hour_description STRING
 )
 STORED AS ORC;
 
-CREATE TABLE IF NOT EXISTS date_dim (
+CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.date_dim (
     date_id DATE,
     year INT,
     quarter INT,
@@ -72,7 +79,7 @@ STORED AS ORC;
 -- ========================
 
 -- customer_dim (needs ACID and partitioned by is_current)
-CREATE TABLE IF NOT EXISTS customer_dim (
+CREATE TABLE IF NOT EXISTS  AirLine.customer_dim (
     passenger_id INT,
     passenger_name STRING,
     passenger_dateOfBirth DATE,
@@ -82,20 +89,23 @@ CREATE TABLE IF NOT EXISTS customer_dim (
     passenger_points INT,
     passenger_status STRING,
     start_date DATE,
-    end_date DATE,
-    is_current STRING
+    end_date DATE
 )
-PARTITIONED BY (start_year INT, start_month INT)
-CLUSTERED BY (passenger_id) INTO 4 BUCKETS
+PARTITIONED BY (start_year INT, is_current STRING ) -- filtering in is current more frequently 
+CLUSTERED BY (passenger_id) INTO 4 BUCKETS -- 4 buckets per partition
 STORED AS ORC
-TBLPROPERTIES ('transactional'='true');
+TBLPROPERTIES (
+                'transactional'='true',
+                'orc.compress'='SNAPPY'
+            );
 
--- flight_dim (needs ACID and partitioned by year and month)
-CREATE TABLE IF NOT EXISTS flight_dim (
+
+-- flight_dim (needs ACID and partitioned by year and quarter)
+CREATE TABLE IF NOT EXISTS AirLine.flight_dim (
     flight_id INT,
     origin_airport_id INT,
     destination_airport_id INT,
-    origin_airport_code STRING, --added for denormalization
+    origin_airport_code STRING, --added for denormalization and skip joins
     destination_airport_code STRING, --added for denormalization
     aircraft_model STRING, --added for denormalization
     aircraft_id INT,
@@ -107,12 +117,14 @@ CREATE TABLE IF NOT EXISTS flight_dim (
     miles_earned DECIMAL(10,2)
 )
 PARTITIONED BY (year INT, quarter INT)  -- from origin_date
-CLUSTERED BY (flight_id) INTO 64 BUCKETS
+CLUSTERED BY (flight_id) INTO 4 BUCKETS -- 4 buckets for partition
 STORED AS ORC
-TBLPROPERTIES ('transactional'='true');
+TBLPROPERTIES (
+                'transactional'='true',
+                'orc.compress'='SNAPPY'
+                );
 
--- SegmentActivityFact (Fact table, dynamic, needs ACID and partitioned by year and month)
-CREATE TABLE IF NOT EXISTS SegmentActivityFact (
+CREATE TABLE IF NOT EXISTS AirLine.SegmentActivityFact (
     passenger_id INT,
     class_services_id INT,
     promotion_id INT,
@@ -128,9 +140,12 @@ CREATE TABLE IF NOT EXISTS SegmentActivityFact (
     date_id DATE,
     time_id TIMESTAMP,
     passenger_status STRING, -- frequently aggregated column embedded for performance
-    passenger_points INT -- frequently aggregated column embedded for performance
+    passenger_points INT, -- frequently aggregated column embedded for performance
 )
 PARTITIONED BY (year INT, month INT)
-CLUSTERED BY (flight_id) INTO 64 BUCKETS -- joined with flight_dim
+CLUSTERED BY (flight_id) INTO 8 BUCKETS -- joined with flight_dim
 STORED AS ORC
-TBLPROPERTIES ('transactional'='true');
+TBLPROPERTIES (
+                'transactional'='true',
+                'orc.compress'='SNAPPY'
+            );

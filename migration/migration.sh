@@ -3,12 +3,13 @@ sqoop import \
 --connect jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1 \
 --username airline \
 --password airline \
---query "SELECT aircraft_id, aircraft_name, number_of_seats, aircraft_model, manufacture_year FROM aircraft_dim WHERE \$CONDITIONS" \
---num-mappers 1 \
---target-dir /tmp/aircraft_dim \
+--table aircraft_dim \
+--columns "aircraft_id,aircraft_name,number_of_seats,aircraft_model,manufacture_year" \
+--num-mappers 2 \
+--target-dir /airline-staging-area/aircraft_dim \
 --delete-target-dir \
---driver oracle.jdbc.OracleDriver \
---as-textfile
+--as-textfile \
+--split-by aircraft_id
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -17,12 +18,13 @@ sqoop import \
 --connect jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1 \
 --username airline \
 --password airline \
---query "SELECT airport_id, airport_code, airport_name, airport_city, airport_location FROM airport_dim WHERE \$CONDITIONS" \
---num-mappers 1 \
---target-dir /tmp/airport_dim \
+--table airport_dim \
+--columns "airport_id, airport_code, airport_name, airport_city, airport_location" \
+--num-mappers 2 \
+--target-dir /airline-staging-area/airport_dim \
 --delete-target-dir \
---driver oracle.jdbc.OracleDriver \
---as-textfile
+--as-textfile \
+--split-by airport_id
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -31,12 +33,13 @@ sqoop import \
 --connect jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1 \
 --username airline \
 --password airline \
---query "SELECT status_id, reservation_status, cancellation_reason FROM trip_status_dim WHERE \$CONDITIONS" \
---num-mappers 1 \
---target-dir /tmp/trip_status_dim \
+--table trip_status_dim \
+--columns "status_id, reservation_status, cancellation_reason" \
+--num-mappers 2 \
+--target-dir /airline-staging-area/trip_status_dim \
 --delete-target-dir \
---driver oracle.jdbc.OracleDriver \
---as-textfile
+--as-textfile \
+--split-by status_id
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -45,12 +48,13 @@ sqoop import \
 --connect jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1 \
 --username airline \
 --password airline \
---query "SELECT class_of_services_id, class_purchased, class_flown, class_change_indicator FROM class_services_dim WHERE \$CONDITIONS" \
---num-mappers 1 \
---target-dir /tmp/class_services_dim \
+--table class_services_dim \
+--columns "class_of_services_id, class_purchased, class_flown, class_change_indicator" \
+--num-mappers 2 \
+--target-dir /airline-staging-area/class_services_dim \
 --delete-target-dir \
---driver oracle.jdbc.OracleDriver \
---as-textfile 
+--as-textfile \
+--split-by class_of_services_id
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -59,12 +63,13 @@ sqoop import \
 --connect jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1 \
 --username airline \
 --password airline \
---query "SELECT promotion_id, valid_from, valid_to, maximum_fare_discount, promotion_percentage, category FROM promotion_dim WHERE \$CONDITIONS" \
---num-mappers 1 \
---target-dir /tmp/promotion_dim \
+--table promotion_dim \
+--columns "promotion_id, valid_from, valid_to, maximum_fare_discount, promotion_percentage, category" \
+--num-mappers 2 \
+--target-dir /airline-staging-area/promotion_dim \
 --delete-target-dir \
---driver oracle.jdbc.OracleDriver \
---as-textfile
+--as-textfile \
+--split-by promotion_id
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -73,12 +78,13 @@ sqoop import \
 --connect jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1 \
 --username airline \
 --password airline \
---query "SELECT time_id, hour, minute, hour_description FROM time_dim WHERE \$CONDITIONS" \
---num-mappers 1 \
---target-dir /tmp/time_dim \
+--table time_dim \
+--columns "time_id, hour, minute, hour_description" \
+--num-mappers 2 \
+--target-dir /airline-staging-area/time_dim \
 --delete-target-dir \
---driver oracle.jdbc.OracleDriver \
---as-textfile
+--as-textfile \
+--split-by time_id
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -87,12 +93,13 @@ sqoop import \
 --connect jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1 \
 --username airline \
 --password airline \
---query "SELECT date_id, year, quarter, month, day_of_week, day_of_month, day_of_year, week_of_year, is_holiday FROM date_dim WHERE \$CONDITIONS" \
---num-mappers 1 \
---target-dir /tmp/date_dim \
+--table date_dim \
+--columns "date_id, year, quarter, month, day_of_week, day_of_month, day_of_year, week_of_year, is_holiday" \
+--num-mappers 2 \
+--target-dir /airline-staging-area/date_dim \
 --delete-target-dir \
---driver oracle.jdbc.OracleDriver \
---as-textfile
+--as-textfile \
+--split-by date_id
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -101,12 +108,13 @@ sqoop import \
 --connect jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1 \
 --username airline \
 --password airline \
---query "SELECT sk_passenger_id, passenger_id, passenger_name, passenger_dateOfBirth, passenger_gender, passenger_address, passenger_phone, passenger_points, passenger_status, start_date, end_date, is_current FROM customer_dim WHERE \$CONDITIONS" \
---num-mappers 1 \
---target-dir /tmp/customer_dim \
+--table customer_dim \
+--columns "sk_passenger_id, passenger_id, passenger_name, passenger_dateOfBirth, passenger_gender, passenger_address, passenger_phone, passenger_points, passenger_status, start_date, end_date, is_current" \
+--num-mappers 4 \
+--target-dir /airline-staging-area/customer_dim \
 --delete-target-dir \
---driver oracle.jdbc.OracleDriver \
---as-textfile
+--as-textfile \
+--split-by sk_passenger_id
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -115,12 +123,13 @@ sqoop import \
 --connect jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1 \
 --username airline \
 --password airline \
---query "SELECT flight_id, origin_airport_id, destination_airport_id, origin_date, origin_time, arrival_date, arrival_time, aircraft_id, segment_miles, miles_earned FROM flight_dim WHERE \$CONDITIONS" \
---num-mappers 1 \
---target-dir /tmp/flight_dim \
+--table flight_dim \
+--columns "flight_id, origin_airport_id, destination_airport_id, origin_date, origin_time, arrival_date, arrival_time, aircraft_id, segment_miles, miles_earned" \
+--num-mappers 4 \
+--target-dir /airline-staging-area/flight_dim \
 --delete-target-dir \
---driver oracle.jdbc.OracleDriver \
---as-textfile
+--as-textfile \
+--split-by flight_id
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -129,9 +138,10 @@ sqoop import \
 --connect jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1 \
 --username airline \
 --password airline \
---query "SELECT passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount, date_id, time_id FROM SegmentActivityFact WHERE \$CONDITIONS" \
---num-mappers 1 \
---target-dir /tmp/SegmentActivityFact \
+--table SegmentActivityFact \
+--columns "passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount, date_id, time_id" \
+--num-mappers 4 \
+--target-dir /airline-staging-area/SegmentActivityFact \
 --delete-target-dir \
---driver oracle.jdbc.OracleDriver \
---as-textfile
+--as-textfile \
+--split-by passenger_id
