@@ -56,6 +56,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-server \
     vim \
     openjdk-8-jdk \
+    cron \ 
     && rm -rf /var/lib/apt/lists/*
 
 # Create hadoop user and group (same as builder)
