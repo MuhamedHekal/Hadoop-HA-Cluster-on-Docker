@@ -142,7 +142,7 @@ services:
     environment:
       - ROLE=sqoop
     volumes:
-      - ./migration/migration.sh:/home/hadoop/migration.sh # script to run sqoop import from oracle to HDFS
+      - ./ELT/IncLoadToStaging.sh:/home/hadoop/IncLoadToStaging.sh # script to load data from source to staging
     depends_on:
       master1:
         condition: service_healthy
