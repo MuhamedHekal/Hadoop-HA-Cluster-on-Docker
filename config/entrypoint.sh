@@ -89,5 +89,9 @@ if [ "$ROLE" = "metastore_service" ]; then
     sleep 5
 fi
 
+if [ "$ROLE" = "sqoop" ]; then
+   chmod 755 /home/hadoop/IncLoadToStaging.sh
+fi
+
 
 tail -f /dev/null
