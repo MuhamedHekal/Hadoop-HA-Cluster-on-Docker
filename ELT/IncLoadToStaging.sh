@@ -1,4 +1,23 @@
-#!/bin/bash
+#!/bin/bash -l
+
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64
+export HADOOP_HOME=/home/hadoop/hadoop
+export HADOOP_INSTALL=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export HADOOP_YARN_HOME=$HADOOP_HOME
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export HADOOP_OPTS="-Djava.library.path=$HADOOP_HOME/lib/native"
+export ZOOKEEPER_HOME=/home/hadoop/zookeeper
+export HIVE_HOME=/home/hadoop/hive
+export HIVE_CONF_DIR=$HIVE_HOME/conf
+export TEZ_HOME=/home/hadoop/tez
+export SQOOP_HOME=/home/hadoop/sqoop
+export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin:$ZOOKEEPER_HOME/bin:$HIVE_HOME/bin:$TEZ_HOME/bin:$SQOOP_HOME/bin
+export TEZ_CONF_DIR=$TEZ_HOME/conf
+export TEZ_JARS=$TEZ_HOME/*:$TEZ_HOME/lib/*
+export HADOOP_CLASSPATH=$TEZ_CONF_DIR:$TEZ_JARS
 
 # Configuration
 ORACLE_CONN="jdbc:oracle:thin:@//oracle_db:1521/FREEPDB1"
@@ -25,7 +44,7 @@ incremental_load() {
     log "Starting incremental load for table ${TABLE_NAME}"
     
     # Ensure base directory exists
-    hadoop fs -mkdir -p "${BASE_DIR}/${TABLE_NAME}" >> "$LOG_FILE" 2>&1
+    /home/hadoop/hadoop/bin/hadoop fs -mkdir -p "${BASE_DIR}/${TABLE_NAME}" >> "$LOG_FILE" 2>&1
     
     # Get last load timestamp or default to a very old date
     if hadoop fs -test -e "$TIMESTAMP_FILE"; then
@@ -69,7 +88,7 @@ incremental_load() {
         log "Successfully loaded data to ${TARGET_DIR}"
         
         # Create success marker
-        hadoop fs -touchz "${TARGET_DIR}/_SUCCESS"
+        /home/hadoop/hadoop/bin/hadoop fs -touchz "${TARGET_DIR}/_SUCCESS"
     else
         log "ERROR: Sqoop import failed for ${TABLE_NAME}"
         return 1
