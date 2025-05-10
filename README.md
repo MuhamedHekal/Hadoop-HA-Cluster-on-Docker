@@ -1,159 +1,154 @@
-# Hadoop Cluster with High Availability (HA)
+# Hadoop + Hive Data Warehouse on Docker (High Availability)
 
-A Dockerized Hadoop cluster with High Availability (HA) configuration, featuring multiple master nodes (NameNode, ResourceManager, JournalNode) and worker nodes (DataNode, NodeManager) with ZooKeeper for failover management.
+A Dockerized Big Data Analytics Platform with Hadoop High Availability and Apache Hive for scalable, cost-effective data warehousing.
 
-## Features
+##  Key Features
 
-- **High Availability NameNode**: 3-node HA setup with automatic failover
-- **ResourceManager HA**: YARN ResourceManager with 3 active/standby nodes
-- **JournalNodes**: For shared edits between NameNodes
-- **ZooKeeper Ensemble**: For coordination and failover management
-- **Persistent Storage**: Using Docker volumes for HDFS data
-- **Health Checks**: Built-in container health monitoring
+- **Hadoop HA Cluster**: 3-master-node setup with automatic failover (NameNode, ResourceManager, JournalNode)
+- **Apache Hive Integration**: SQL-on-Hadoop engine layered over HDFS
+- **Tez Execution Engine**: Optimized query execution for Hive
+- **ACID Transactions in Hive**: For reliable insert/update/delete on fact/dimension tables
+- **Incremental Loading**: Sqoop + Bash + Hive integration for daily delta loads
+- **Schema-on-Read with ORC**: Efficient columnar storage
+- **Data Validation**: Staging tables and row count comparison
 
-## Cluster Architecture
-![Project Architecture](photo/projectArch.png)
-### Master Nodes (3)
-- NameNode (HA)
-- JournalNode
-- ZooKeeper
-- ResourceManager (HA YARN)
+---
 
-### Worker Nodes
-- DataNode
-- NodeManager (YARN)
+## Architecture
+- Hadoop HA Master and Worker Nodes
+- HiveServer2, Hive Metastore (PostgreSQL), Tez Engine
+- Sqoop + Bash for ELT automation
+- HDFS Staging Area + Hive Final Tables
 
-## Configuration Files
+---
 
-- `core-site.xml`: Core Hadoop configuration
-    - Set default FS to HA cluster: hdfs://mycluster
-- `hdfs-site.xml`: HDFS configuration with HA settings
-    - Configured 3-node HA for NameNodes (nn1, nn2, nn3)
-    - JournalNodes for shared edits (qjournal://Master1:8485;Master2:8485 Master3:8485)
-    - Automatic failover enabled with ZooKeeper
-    - Fencing method configured with SSH
-    - Data and name directories set up
-- `yarn-site.xml`: YARN and ResourceManager HA configuration
-    - Configured 3-node ResourceManager HA (rm1, rm2, rm3)
-    - MapReduce shuffle service enabled
-    - ZooKeeper addresses for RM state store
-- `mapred-site.xml`: MapReduce configuration
-    - Configured MapReduce environment variables
-    - Set paths for MapReduce components
-- `zoo.cfg`: ZooKeeper ensemble configuration
-    - Configured 3-node ZooKeeper ensemble
-    - Tick time, init limit, sync limit settings
-    - Server addresses with election ports
-- `entrypoint.sh`: Startup script for container initialization
+##  Project Structure
 
-## Documentation References
-- [HDFS High Availability with QJM](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/HDFSHighAvailabilityWithQJM.html#Deployment)
-- [ResourceManager High Availability](https://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-site/ResourceManagerHA.html)
-
-## Prerequisites
-
-- Docker
-- Docker Compose
-- At least 8GB RAM recommended
-
-## Getting Started
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/MuhamedHekal/Hadoop-HA-Cluster-on-Docker.git
-   
-   cd Hadoop-HA-Cluster-on-Docker
-   ```
-
-2.  **Build and start the cluster**:
-    ```bash
-    docker-compose up -d
-    ```
-
-3. **Access the Web UIs**:
-
-- NameNode:
-    - **Master1:** [http://localhost:9871](http://localhost:9871)
-    - **Master2:** [http://localhost:9872](http://localhost:9872)
-    - **Master3:** [http://localhost:9873](http://localhost:9873)
-
-- ResourceManager:
-    - **Master1:** [http://localhost:8088](http://localhost:8088)
-    - **Master2:** [http://localhost:8089](http://localhost:8089)
-    - **Master3:** [http://localhost:8090](http://localhost:8090)
-
-
-
-## Port Mappings
-
-| Service            | Master1 | Master2 | Master3 |
-|--------------------|---------|---------|---------|
-| **NameNode HTTP**  |  9871   |  9872   |  9873   |
-| **ResourceManager** |  8088   |  8089   |  8090   |
-
-
-## Cluster Management Commands
-
-### Check Service States
-
-#### Check HDFS HA status:
-```bash
-hdfs haadmin -getAllServiceState
 ```
-
-#### Check YARN RM status:
-```bash
-yarn rmadmin -getAllServiceState
+├── docker-compose.yml
+├── config-hadoop/
+│   └── core-site.xml, hdfs-site.xml, yarn-site.xml, mapred-site.xml, zoo.cfg
+├── config_hive/
+│   └── hive-site.xml, tez-site.xml, entrypoint scripts
+├── scripts/
+│   ├── entrypoint.sh
+│   ├── IncLoadToStaging.sh
+│   ├── StagingSchema.sh
+│   └── IncLoadToHive.sh
+|   └── migration.sh
+├── sql/
+│   ├── staging-tables.sql
+│   ├── hive-DDL.sql
+│   ├── insert-into-hive-schema.sql
+│   └── validate-migration.sql
 ```
 
 ---
 
-### Test the Cluster
+##  Getting Started
 
-#### 1. Verify HDFS:
+### Step 1: Clone the Repo
+
 ```bash
+git clone https://github.com/MuhamedHekal/Hadoop-HA-Cluster-on-Docker.git
+cd Hadoop-HA-Cluster-on-Docker
+```
+
+### Step 2: Start Hadoop + Hive Cluster
+
+```bash
+docker-compose up -d
+```
+
+---
+
+##  Web Interfaces
+
+| Service           | Master1          | Master2          | Master3          |
+|------------------|------------------|------------------|------------------|
+| NameNode         | http://localhost:9871 | http://localhost:9872 | http://localhost:9873 |
+| ResourceManager  | http://localhost:8088 | http://localhost:8089 | http://localhost:8090 |
+
+
+---
+
+##  Hive Implementation Details
+
+###  Schema Migration
+
+- Migrated 9 dimensions + 1 fact table from Oracle DWH using `Sqoop`
+- Schema design follows:
+  - **Staging Layer**: External text-based Hive tables
+  - **Final Layer**: ORC-formatted ACID-compliant tables with partitioning & bucketing
+
+###  Data Ingestion
+
+- `IncLoadToStaging.sh`: Bash + Sqoop to pull daily incremental data into HDFS
+- `StagingSchema.sh`: Creates Hive staging tables pointing to new HDFS folders
+- `IncLoadToHive.sh`: Handles SCD logic to update `is_current` flags and insert deltas
+
+### Optimization Techniques
+
+- **Partitioning**: By date/year, etc
+- **Bucketing**: For join performance (especially for fact tables)
+- **Tez Engine**: Fast execution with vectorized processing
+- **Compression**: ORC + Snappy
+
+---
+
+##  Test and Validation
+
+```bash
+# HDFS test
 hdfs dfs -mkdir /test
-hdfs dfs -put <localfile> /test
+hdfs dfs -put localfile.csv /test
 hdfs dfs -ls /test
+
+# Hive row count validation
+hive -f migration/validate-migration.sql
 ```
-
-#### 2. Run a MapReduce job:
-```bash
-hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 16 1000
-```
-
-#### 3. Check YARN applications:
-```bash
-yarn application -list
-```
-
-## Environment Variables
-
-- **MYID**: ZooKeeper node ID (1, 2, or 3 for masters)
-- **ROLE**: `master` or `worker` node type
-
-
-## Add Additional Worker Nodes
-```
-docker container run --name worker2 -h worker2 --network hadoop-ha-cluster-on-docker_default -e ROLE=worker -v Worker2-datanode:/home/hadoop/hadoopdata/hdfs/datanode hadoop-ha-cluster-on-docker-worker1
-```
-
-## Volumes
-
-The cluster uses Docker volumes to persist:
-
-- NameNode data
-- JournalNode data
-- ZooKeeper data
-- DataNode data
 
 ---
 
-## Health Checks
+##  Automation
 
-Each container has health checks to verify critical services are running:
+| Script                 | Frequency | Purpose                                 |
+|------------------------|-----------|-----------------------------------------|
+| `IncLoadToStaging.sh`  | Daily 12AM | Pulls changed Oracle rows via Sqoop     |
+| `StagingSchema.sh`     | Daily 12AM | Maps new HDFS folders to staging tables |
+| `IncLoadToHive.sh`     | Daily 12AM | Performs merge into final Hive tables   |
 
-- **Masters**: Checks for QuorumPeerMain, NameNode, DFSZKFailoverController, ResourceManager, and JournalNode processes
-- **Workers**: Checks for DataNode, and NodeManager processes
+**Crontab Example:**
+```bash
+0 0 * * * /home/hadoop/IncLoadToStaging.sh
+```
 
+---
+
+
+##  Sample Table DDL
+
+```sql
+CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.customer_dim (
+  passenger_id INT,
+  passenger_name STRING,
+  passenger_dateOfBirth DATE,
+  passenger_gender STRING,
+  ...
+)
+PARTITIONED BY (start_year INT, is_current STRING)
+CLUSTERED BY (passenger_id) INTO 4 BUCKETS
+STORED AS ORC
+TBLPROPERTIES ('transactional'='true', 'orc.compress'='SNAPPY');
+```
+
+---
+
+##  Data Volumes
+
+| Volume            | Used For         |
+|-------------------|------------------|
+| `hive-metastore`  | PostgreSQL metadata |
+| `namenode-data`   | HDFS NN storage     |
+| `datanode-data`   | HDFS data blocks    |
 

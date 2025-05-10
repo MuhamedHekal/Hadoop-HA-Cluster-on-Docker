@@ -7,7 +7,7 @@ sudo service ssh start
 if [ "$ROLE" == "master" ]; then
     /home/hadoop/zookeeper/bin/zkServer.sh start
     hdfs --daemon start journalnode
-    sleep 5
+    sleep 10
 
     if [ "$MYID" -eq 1 ]; then
         # Check if namenode is already formatted
