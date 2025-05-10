@@ -91,6 +91,7 @@ fi
 
 if [ "$ROLE" = "sqoop" ]; then
    chmod 755 /home/hadoop/IncLoadToStaging.sh
+   sudo service cron start 
    crontab -l | grep -Fq "0 0 * * * /home/hadoop/IncLoadToStaging.sh" || (crontab -l 2>/dev/null; echo "0 0 * * * /home/hadoop/IncLoadToStaging.sh >> /home/hadoop/cron.log 2>&1") | crontab -
 fi
 
