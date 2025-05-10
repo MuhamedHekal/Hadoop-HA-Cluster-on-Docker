@@ -4,7 +4,7 @@ USE AirLine;
 -- Static Dimension Tables (Non-ACID)
 -- ========================
 
-CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.aircraft_dim (
+CREATE TABLE IF NOT EXISTS AirLine.aircraft_dim (
     aircraft_id INT,
     aircraft_name STRING,
     number_of_seats INT,
@@ -14,7 +14,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.aircraft_dim (
 STORED AS ORC;
 
 
-CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.airport_dim (
+CREATE TABLE IF NOT EXISTS AirLine.airport_dim (
     airport_id INT,
     airport_code STRING,
     airport_name STRING,
@@ -24,7 +24,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.airport_dim (
 STORED AS ORC;
 
 
-CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.trip_status_dim (
+CREATE TABLE IF NOT EXISTS AirLine.trip_status_dim (
     status_id INT,
     reservation_status STRING,
     cancellation_reason STRING
@@ -32,7 +32,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.trip_status_dim (
 STORED AS ORC;
 
 
-CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.class_services_dim (
+CREATE TABLE IF NOT EXISTS AirLine.class_services_dim (
     class_of_services_id INT,
     class_purchased STRING,
     class_flown STRING,
@@ -41,7 +41,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.class_services_dim (
 STORED AS ORC;
 
 
-CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.promotion_dim (
+CREATE TABLE IF NOT EXISTS AirLine.promotion_dim (
     promotion_id INT,
     valid_from DATE,
     valid_to DATE,
@@ -52,7 +52,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.promotion_dim (
 STORED AS ORC;
 
 
-CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.time_dim (
+CREATE TABLE IF NOT EXISTS AirLine.time_dim (
     time_id TIMESTAMP,
     hour INT,
     minute INT,
@@ -61,7 +61,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.time_dim (
 )
 STORED AS ORC;
 
-CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.date_dim (
+CREATE TABLE IF NOT EXISTS AirLine.date_dim (
     date_id DATE,
     year INT,
     quarter INT,
