@@ -54,7 +54,7 @@ SELECT
 FROM date_dim_staging;
 
 -- Load ACID dimension tables with partitioning
-INSERT OVERWRITE TABLE AirLine.customer_dim PARTITION(start_year, is_current)
+INSERT OVERWRITE TABLE AirLine.customer_dim PARTITION(start_year)
 SELECT 
     passenger_id,
     passenger_name,
@@ -66,8 +66,9 @@ SELECT
     passenger_status,
     to_date(start_date) as start_date,
     to_date(end_date) as end_date,
-    year(to_date(start_date)) as start_year,
-    is_current
+    is_current,
+    year(to_date(start_date)) as start_year
+    
 FROM customer_dim_staging;
 
 

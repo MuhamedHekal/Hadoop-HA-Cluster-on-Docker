@@ -381,30 +381,30 @@ BEGIN
     COMMIT;
 END;
 /
-Commit;
-
+COMMIT;
 --segment activity fact data
 INSERT ALL
-    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount) 
-    VALUES (1, 1, 1, 101, 1, 'TKT10001', 0, 500.00, 0.00, 0.00)
-    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount) 
-    VALUES (2, 2, NULL, 102, 2, 'TKT10002', 1, 750.00, 50.00, 100.00)
-    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount) 
-    VALUES (3, 3, 2, 103, 3, 'TKT10003', 0, 1200.00, 80.00, 200.00)
-    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount) 
-    VALUES (4, 1, 3, 104, 1, 'TKT10004', 1, 400.00, 0.00, 0.00)
-    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount) 
-    VALUES (5, 2, NULL, 105, 2, 'TKT10005', 0, 600.00, 40.00, 90.00)
-    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount) 
-    VALUES (6, 3, 4, 106, 3, 'TKT10006', 1, 1350.00, 100.00, 250.00)
-    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount) 
-    VALUES (7, 1, NULL, 107, 1, 'TKT10007', 0, 520.00, 0.00, 0.00)
-    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount) 
-    VALUES (8, 2, 2, 108, 2, 'TKT10008', 1, 820.00, 60.00, 120.00)
-    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount) 
-    VALUES (9, 3, NULL, 109, 3, 'TKT10009', 0, 1450.00, 120.00, 300.00)
-    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount) 
-    VALUES (10, 1, 1, 110, 1, 'TKT10010', 1, 550.00, 0.00, 0.00)
+    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount,DATE_ID,TIME_ID) 
+    VALUES (1, 1, 1, 101, 1, 'TKT10001', 0, 500.00, 0.00, 0.00, TO_DATE('2020-01-01', 'YYYY-MM-DD'), TO_TIMESTAMP('2020-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS'))
+    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount,DATE_ID,TIME_ID) 
+    VALUES (2, 2, NULL, 102, 2, 'TKT10002', 1, 750.00, 50.00, 100.00, TO_DATE('2020-01-02', 'YYYY-MM-DD'), TO_TIMESTAMP('2020-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS'))
+    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount,DATE_ID,TIME_ID) 
+    VALUES (3, 3, 2, 103, 3, 'TKT10003', 0, 1200.00, 80.00, 200.00, TO_DATE('2020-01-03', 'YYYY-MM-DD'), TO_TIMESTAMP('2020-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS'))
+    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount,DATE_ID,TIME_ID)
+    VALUES (4, 1, 3, 104, 1, 'TKT10004', 1, 400.00, 0.00, 0.00, TO_DATE('2020-01-04', 'YYYY-MM-DD'), TO_TIMESTAMP('2020-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')) 
+    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount,DATE_ID,TIME_ID) 
+    VALUES (5, 2, NULL, 105, 2, 'TKT10005', 0, 600.00, 40.00, 90.00, TO_DATE('2020-01-05', 'YYYY-MM-DD'), TO_TIMESTAMP('2020-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS'))
+    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount,DATE_ID,TIME_ID) 
+    VALUES (6, 3, 4, 106, 3, 'TKT10006', 1, 1350.00, 100.00, 250.00, TO_DATE('2020-01-06', 'YYYY-MM-DD'), TO_TIMESTAMP('2020-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS'))
+    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount,DATE_ID,TIME_ID) 
+    VALUES (7, 1, NULL, 107, 1, 'TKT10007', 0, 520.00, 0.00, 0.00, TO_DATE('2020-01-07', 'YYYY-MM-DD'), TO_TIMESTAMP('2020-01-01 02:30:00', 'YYYY-MM-DD HH24:MI:SS'))
+    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount,DATE_ID,TIME_ID) 
+    VALUES (8, 2, 2, 108, 2, 'TKT10008', 1, 820.00, 60.00, 120.00, TO_DATE('2020-01-08', 'YYYY-MM-DD'), TO_TIMESTAMP('2020-01-01 02:30:00', 'YYYY-MM-DD HH24:MI:SS'))
+    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount,DATE_ID,TIME_ID) 
+    VALUES (9, 3, NULL, 109, 3, 'TKT10009', 0, 1450.00, 120.00, 300.00, TO_DATE('2020-01-09', 'YYYY-MM-DD'), TO_TIMESTAMP('2020-01-01 02:30:00', 'YYYY-MM-DD HH24:MI:SS'))
+    INTO SegmentActivityFact (passenger_id, class_services_id, promotion_id, flight_id, status_id, ticket_number, overnight_stay, revenue_amount, cancellation_fees, refund_amount,DATE_ID,TIME_ID) 
+    VALUES (10, 1, 1, 110, 1, 'TKT10010', 1, 550.00, 0.00, 0.00, TO_DATE('2020-01-10', 'YYYY-MM-DD'), TO_TIMESTAMP('2020-01-01 02:30:00', 'YYYY-MM-DD HH24:MI:SS'))
 SELECT 1 FROM DUAL;
 
 Commit;
+

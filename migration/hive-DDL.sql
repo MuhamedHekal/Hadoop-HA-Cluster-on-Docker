@@ -89,9 +89,10 @@ CREATE TABLE IF NOT EXISTS  AirLine.customer_dim (
     passenger_points INT,
     passenger_status STRING,
     start_date DATE,
-    end_date DATE
+    end_date DATE,
+    is_current STRING
 )
-PARTITIONED BY (start_year INT, is_current STRING ) -- filtering in is current more frequently 
+PARTITIONED BY (start_year INT) -- filtering in is current more frequently 
 CLUSTERED BY (passenger_id) INTO 4 BUCKETS -- 4 buckets per partition
 STORED AS ORC
 TBLPROPERTIES (
