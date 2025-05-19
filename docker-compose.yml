@@ -5,6 +5,7 @@ services:
     container_name: master1
     ports:
       - "9871:9870" # NameNode HTTP
+      - "9000:9000"
       - "8088:8088" # YARN ResourceManager
     volumes:
       - master1-journalnode:/home/hadoop/hadoopdata/hdfs/journalnode
