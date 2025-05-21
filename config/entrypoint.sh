@@ -39,6 +39,8 @@ fi
 if [ "$ROLE" == "worker" ]; then
     hdfs --daemon start datanode
     yarn --daemon start nodemanager
+    hbase-daemon.sh start regionserver # habse region server start
+    
 fi
 
 if [ "$ROLE" = "hive" ]; then
@@ -94,6 +96,15 @@ if [ "$ROLE" = "sqoop" ]; then
    sudo service cron start 
    crontab -l | grep -Fq "0 0 * * * /home/hadoop/IncLoadToStaging.sh" || (crontab -l 2>/dev/null; echo "0 0 * * * /home/hadoop/IncLoadToStaging.sh >> /home/hadoop/cron.log 2>&1") | crontab -
 fi
+
+if [ "$ROLE" = "hbmaster" ]; then
+
+    start-hbase.sh # start hbase service 
+fi
+
+# if [ "$ROLE" = "rgserver" ]; then
+#     hbase-daemon.sh start regionserver # habse region server start 
+# fi
 
 
 tail -f /dev/null
