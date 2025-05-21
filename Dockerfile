@@ -47,7 +47,14 @@ RUN wget https://archive.apache.org/dist/sqoop/1.4.7/sqoop-1.4.7.bin__hadoop-2.6
     rm sqoop-1.4.7.bin__hadoop-2.6.0.tar.gz && \
     wget -O /home/hadoop/sqoop/lib/ojdbc8.jar https://download.oracle.com/otn-pub/otn_software/jdbc/1912/ojdbc8.jar
 
-# Runtime Stage 
+# Download and extract HBase
+RUN wget https://archive.apache.org/dist/hbase/2.5.11/hbase-2.5.11-bin.tar.gz && \
+    tar -xzf hbase-2.5.11-bin.tar.gz && \
+    mv hbase-2.5.11 hbase && \
+    rm hbase-2.5.11-bin.tar.gz
+
+
+# Runtime Stage
 FROM ubuntu:22.04
 
 # Install only runtime dependencies
@@ -80,7 +87,8 @@ ENV HIVE_HOME=/home/hadoop/hive
 ENV HIVE_CONF_DIR=$HIVE_HOME/conf
 ENV TEZ_HOME=/home/hadoop/tez
 ENV SQOOP_HOME=/home/hadoop/sqoop
-ENV PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin:$ZOOKEEPER_HOME/bin:$HIVE_HOME/bin:$TEZ_HOME/bin:$SQOOP_HOME/bin
+ENV HBASE_HOME=/home/hadoop/hbase
+ENV PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin:$ZOOKEEPER_HOME/bin:$HIVE_HOME/bin:$TEZ_HOME/bin:$SQOOP_HOME/bin:$HBASE_HOME/bin
 ENV TEZ_CONF_DIR=$TEZ_HOME/conf
 ENV TEZ_JARS=$TEZ_HOME/*:$TEZ_HOME/lib/*
 ENV HADOOP_CLASSPATH=$TEZ_CONF_DIR:$TEZ_JARS
@@ -89,17 +97,28 @@ USER hadoop
 WORKDIR /home/hadoop
 
 # Copy installed components from builder stage
-COPY --from=hadoop_base --chown=hadoop:hadoopG  /home/hadoop/hadoop /home/hadoop/hadoop
+COPY --from=hadoop_base --chown=hadoop:hadoopG /home/hadoop/hadoop /home/hadoop/hadoop
 COPY --from=hadoop_base --chown=hadoop:hadoopG /home/hadoop/zookeeper /home/hadoop/zookeeper
 COPY --from=hadoop_base --chown=hadoop:hadoopG /home/hadoop/hive /home/hadoop/hive
 COPY --from=hadoop_base --chown=hadoop:hadoopG /home/hadoop/tez /home/hadoop/tez
 COPY --from=hadoop_base --chown=hadoop:hadoopG /home/hadoop/sqoop /home/hadoop/sqoop
 COPY --from=hadoop_base --chown=hadoop:hadoopG /home/hadoop/hive/lib/postgresql-42.5.4.jar /home/hadoop/hive/lib/postgresql-42.5.4.jar
+COPY --from=hadoop_base --chown=hadoop:hadoopG /home/hadoop/hbase /home/hadoop/hbase
 
-# Configure SSH
-RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
+# SSH Setup (Secure + Non-Interactive)
+RUN mkdir -p ~/.ssh && \
+    chmod 700 ~/.ssh && \
+    # 1. Generate key pair (no password)
+    ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa && \
+    # 2. Allow self-connection
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
-    chmod 640 ~/.ssh/authorized_keys
+    chmod 600 ~/.ssh/authorized_keys && \
+    # 3. Disable host checking (for container environments only!)
+    echo "Host *" >> ~/.ssh/config && \
+    echo "  StrictHostKeyChecking no" >> ~/.ssh/config && \
+    echo "  UserKnownHostsFile /dev/null" >> ~/.ssh/config && \
+    chmod 600 ~/.ssh/config
+
 
 # Create Hadoop data directories
 RUN mkdir -p /home/hadoop/hadoopdata/hdfs/namenode \
@@ -112,5 +131,11 @@ COPY  config/ /home/hadoop/hadoop/etc/hadoop/
 COPY  config/zoo.cfg /home/hadoop/zookeeper/conf/zoo.cfg
 COPY  config/hive-site.xml /home/hadoop/hive/conf/hive-site.xml
 COPY  config/tez-site.xml /home/hadoop/tez/conf/tez-site.xml
+
+# Copy HBase configuration files
+COPY config/hbase-site.xml $HBASE_HOME/conf/
+COPY config/regionservers $HBASE_HOME/conf/
+COPY config/backup-masters $HBASE_HOME/conf/
+COPY config/hbase-env.sh $HBASE_HOME/conf/
 
 ENTRYPOINT [ "bash", "/home/hadoop/hadoop/etc/hadoop/entrypoint.sh" ]
