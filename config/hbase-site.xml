@@ -1,0 +1,57 @@
+<configuration>
+  <!-- HBase Cluster Distributed Mode -->
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
+  </property>
+  
+  <!-- ZooKeeper Ensemble -->
+  <property>
+    <name>hbase.zookeeper.quorum</name>
+    <value>master1,master2,master3</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.property.clientPort</name>
+    <value>2181</value>
+  </property>
+  
+  <!-- HBase Root Directory in HDFS -->
+  <property>
+    <name>hbase.rootdir</name>
+    <value>${fs.defaultFS}/hbase</value>
+  </property>
+  
+  <!-- ZooKeeper Data Directory -->
+  <property>
+    <name>hbase.zookeeper.property.dataDir</name>
+    <value>/home/hadoop/hbase/zookeeper</value>
+  </property>
+  
+  <!-- HBase Master HA -->
+  <property>
+    <name>hbase.master</name>
+    <value>hbmaster1:16000,hbmaster2:16000</value>
+  </property>
+  
+  <!-- Number of region servers -->
+  <property>
+    <name>hbase.regionserver.count</name>
+    <value>2</value>
+  </property>
+  <property>
+    <name>hbase.wal.provider</name>
+    <value>filesystem</value>
+  </property>
+  <!-- Enable HBase Master HA -->
+  <property>
+    <name>hbase.multi-master.enabled</name>
+    <value>true</value>
+  </property>
+  
+  <!-- Use Hadoop's ZooKeeper for HBase -->
+  <property>
+    <name>hbase.use.hadoop.zk</name>
+    <value>true</value>
+  </property>
+
+</configuration>
