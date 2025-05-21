@@ -39,6 +39,7 @@ fi
 if [ "$ROLE" == "worker" ]; then
     hdfs --daemon start datanode
     yarn --daemon start nodemanager
+    sleep 10
     hbase-daemon.sh start regionserver # habse region server start
     
 fi
