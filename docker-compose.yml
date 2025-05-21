@@ -1,12 +1,14 @@
+version: '3.8'
+
 services:
   master1:
     build: .
     hostname: master1
     container_name: master1
     ports:
-      - "9871:9870" # NameNode HTTP
+      - "9871:9870"
       - "9000:9000"
-      - "8088:8088" # YARN ResourceManager
+      - "8088:8088"
     volumes:
       - master1-journalnode:/home/hadoop/hadoopdata/hdfs/journalnode
       - master1-namenode:/home/hadoop/hadoopdata/hdfs/namenode
@@ -19,14 +21,21 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    deploy: 
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1500M
+    networks:
+      - hadoop-net
 
   master2:
     build: .
     hostname: master2
     container_name: master2
     ports:
-      - "9872:9870" # NameNode HTTP
-      - "8089:8088" # YARN ResourceManager
+      - "9872:9870"
+      - "8089:8088"
     volumes:
       - master2-journalnode:/home/hadoop/hadoopdata/hdfs/journalnode
       - master2-namenode:/home/hadoop/hadoopdata/hdfs/namenode
@@ -39,14 +48,21 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1500M
+    networks:
+      - hadoop-net
 
   master3:
     build: .
     hostname: master3
     container_name: master3
     ports:
-      - "9873:9870" # NameNode HTTP
-      - "8090:8088" # YARN ResourceManager
+      - "9873:9870"
+      - "8090:8088"
     volumes:
       - master3-journalnode:/home/hadoop/hadoopdata/hdfs/journalnode
       - master3-namenode:/home/hadoop/hadoopdata/hdfs/namenode
@@ -59,6 +75,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1500M
+    networks:
+      - hadoop-net
 
   worker1:
     build: .
@@ -80,19 +103,30 @@ services:
         condition: service_healthy
       master3:
         condition: service_healthy
-  hive:
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 3500M
+    networks:
+      - hadoop-net
+
+  worker2:
     build: .
-    hostname: hive-server
-    container_name: hive-server
+    hostname: worker2
+    container_name: worker2
     ports:
-      - "10000:10000" # HiveServer2
+      - "16021:16020"
+      - "16031:16030"
     volumes:
-      - hive-metastore:/home/hadoop/hive-metastore
-      - ./migration/hive-DDL.sql:/home/hadoop/hive-DDL.sql # create schema with tables in hive 
-      - ./migration/tmp-DDL.sql:/home/hadoop/tmp-DDL.sql # tmp schema for hive passes to migrated files
-      - ./migration/insert-into-hive-schema.sql:/home/hadoop/insert-into-hive-schema.sql # HQL script to insert data into hive tables
+      - worker2-datanode:/home/hadoop/hadoopdata/hdfs/datanode
     environment:
-      - ROLE=hive
+      - ROLE=worker
+    healthcheck:
+      test: ["CMD-SHELL", "jps | grep -E 'DataNode|NodeManager'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     depends_on:
       master1:
         condition: service_healthy
@@ -100,17 +134,23 @@ services:
         condition: service_healthy
       master3:
         condition: service_healthy
-      metastore-service:
-        condition: service_healthy
-    
-  metastore-service:
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 3500M
+    networks:
+      - hadoop-net
+
+  hbmaster1:
     build: .
-    hostname: metastore-service
-    container_name: metastore-service
+    hostname: hbmaster1
+    container_name: hbmaster1
     ports:
-      - "10002:10002" # Hive Metastore
+      - "16000:16000"
+      - "16010:16010"
     environment:
-      - ROLE=metastore_service
+      - ROLE=hbmaster
     depends_on:
       master1:
         condition: service_healthy
@@ -119,31 +159,28 @@ services:
       master3:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "jps | grep -E 'RunJar'"]
-      interval: 10s
+      test: ["CMD-SHELL", "jps | grep -E 'HMaster'"]
+      interval: 30s
       timeout: 10s
       retries: 5
-  metastore-postgres:
-    image: postgres
-    hostname: metastore_postgres
-    container_name: metastore_postgres
-    volumes:
-      - hive-metastore:/var/lib/postgresql/data
-    ports:
-      - 5432:5432 #postgres port
-    environment:
-      - ROLE=metastore_postgres
-      - POSTGRES_PASSWORD=p@ssw0rd
-  sqoop:
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 512M
+    networks:
+      - hadoop-net
+
+  hbmaster2:
     build: .
-    hostname: sqoop
-    container_name: sqoop
+    hostname: hbmaster2
+    container_name: hbmaster2
     ports:
-      - "12000:12000" # Sqoop Server
+      - "16001:16000"
+      - "16011:16010"
     environment:
-      - ROLE=sqoop
-    volumes:
-      - ./ELT/IncLoadToStaging.sh:/home/hadoop/IncLoadToStaging.sh # script to load data from source to staging
+      - ROLE=hbmaster
     depends_on:
       master1:
         condition: service_healthy
@@ -151,6 +188,92 @@ services:
         condition: service_healthy
       master3:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 512M
+    networks:
+      - hadoop-net      
+  # hive:
+  #   build: .
+  #   hostname: hive-server
+  #   container_name: hive-server
+  #   ports:
+  #     - "10000:10000" # HiveServer2
+  #   volumes:
+  #     - hive-metastore:/home/hadoop/hive-metastore
+  #     - ./migration/hive-DDL.sql:/home/hadoop/hive-DDL.sql # create schema with tables in hive 
+  #     - ./migration/tmp-DDL.sql:/home/hadoop/tmp-DDL.sql # tmp schema for hive passes to migrated files
+  #     - ./migration/insert-into-hive-schema.sql:/home/hadoop/insert-into-hive-schema.sql # HQL script to insert data into hive tables
+  #   environment:
+  #     - ROLE=hive
+  #   networks:
+  #     - hadoop-net
+  #   depends_on:
+  #     master1:
+  #       condition: service_healthy
+  #     master2:
+  #       condition: service_healthy
+  #     master3:
+  #       condition: service_healthy
+  #     metastore-service:
+  #       condition: service_healthy
+    
+  # metastore-service:
+  #   build: .
+  #   hostname: metastore-service
+  #   container_name: metastore-service
+  #   ports:
+  #     - "10002:10002" # Hive Metastore
+  #   environment:
+  #     - ROLE=metastore_service
+  #   networks:
+  #       - hadoop-net
+  #   depends_on:
+  #     master1:
+  #       condition: service_healthy
+  #     master2:
+  #       condition: service_healthy
+  #     master3:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "jps | grep -E 'RunJar'"]
+  #     interval: 10s
+  #     timeout: 10s
+  #     retries: 5
+  # metastore-postgres:
+  #   image: postgres
+  #   hostname: metastore_postgres
+  #   container_name: metastore_postgres
+  #   volumes:
+  #     - hive-metastore:/var/lib/postgresql/data
+  #   ports:
+  #     - 5432:5432 #postgres port
+  #   environment:
+  #     - ROLE=metastore_postgres
+  #     - POSTGRES_PASSWORD=p@ssw0rd
+  #   networks:
+  #       - hadoop-net
+  # sqoop:
+  #   build: .
+  #   hostname: sqoop
+  #   container_name: sqoop
+  #   ports:
+  #     - "12000:12000" # Sqoop Server
+  #   environment:
+  #     - ROLE=sqoop
+  #   networks:
+  #       - hadoop-net
+  #   volumes:
+  #     - ./ELT/IncLoadToStaging.sh:/home/hadoop/IncLoadToStaging.sh # script to load data from source to staging
+  #   depends_on:
+  #     master1:
+  #       condition: service_healthy
+  #     master2:
+  #       condition: service_healthy
+  #     master3:
+  #       condition: service_healthy
     
 
 volumes:
@@ -164,4 +287,9 @@ volumes:
   master3-namenode:
   master3-zookeeper:
   worker1-datanode:
-  hive-metastore:
+  worker2-datanode:
+  #hive-metastore:
+
+networks:
+  hadoop-net:
+    driver: bridge
