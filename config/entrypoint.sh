@@ -102,9 +102,4 @@ if [ "$ROLE" = "hbmaster" ]; then
     start-hbase.sh # start hbase service 
 fi
 
-# if [ "$ROLE" = "rgserver" ]; then
-#     hbase-daemon.sh start regionserver # habse region server start 
-# fi
-
-
 tail -f /dev/null
