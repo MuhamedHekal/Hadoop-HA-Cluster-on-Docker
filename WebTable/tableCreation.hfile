@@ -1,0 +1,7 @@
+create 'WebTable', 
+  {NAME => 'Content', VERSIONS => 3, TTL => 7776000, BLOOMFILTER => 'ROW'},  # 90 days in seconds add row bllom filter to reduce the disk reads
+  {NAME => 'Metadata', VERSIONS => 1},
+  {NAME => 'Outlinks', VERSIONS => 2, TTL => 15552000}, # 180 days in seconds
+  {NAME => 'Inlinks', VERSIONS => 2, TTL => 15552000},  # 180 days in seconds
+  {SPLITS => ['32-', '64-', '96-', '128-', '160-', '192-', '224-']} # pre splitting for preventing hotspotting
+
