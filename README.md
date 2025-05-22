@@ -1,154 +1,103 @@
-# Hadoop + Hive Data Warehouse on Docker (High Availability)
 
-A Dockerized Big Data Analytics Platform with Hadoop High Availability and Apache Hive for scalable, cost-effective data warehousing.
+# HBase in Hadoop-HA-Cluster-on-Docker
 
-##  Key Features
+## HBase Docker Image & Cluster Setup
 
-- **Hadoop HA Cluster**: 3-master-node setup with automatic failover (NameNode, ResourceManager, JournalNode)
-- **Apache Hive Integration**: SQL-on-Hadoop engine layered over HDFS
-- **Tez Execution Engine**: Optimized query execution for Hive
-- **ACID Transactions in Hive**: For reliable insert/update/delete on fact/dimension tables
-- **Incremental Loading**: Sqoop + Bash + Hive integration for daily delta loads
-- **Schema-on-Read with ORC**: Efficient columnar storage
-- **Data Validation**: Staging tables and row count comparison
+- **HBase runs inside Docker containers** designed to simulate a real distributed cluster.
+- The cluster consists of:
+  - **2 HBase Master**: Manages cluster metadata and coordinates RegionServers.
+  - **2 RegionServers**: Store and serve parts (regions) of HBase tables.
+  - **Zookeeper ensemble**: Provides coordination and failover support for HBase Master.
+  - **Hadoop HDFS**: Underlying filesystem for persistent data storage.
 
+- **Docker Compose** config orchestrates all containers, setting up networking, dependencies, and ports for easy communication.
+- This setup supports **high availability** of the HBase Master via Zookeeper.
+- You can scale the number of RegionServers by increasing container count to handle more load
+add more Worker nodes.
+```
+docker container run --name worker3 -h worker3 --network hadoop-net -e ROLE=worker -v Worker3-datanode:/home/hadoop/hadoopdata/hdfs/datanode hadoop-ha-cluster-on-docker-worker1
+```
 ---
 
-## Architecture
-- Hadoop HA Master and Worker Nodes
-- HiveServer2, Hive Metastore (PostgreSQL), Tez Engine
-- Sqoop + Bash for ELT automation
-- HDFS Staging Area + Hive Final Tables
+## WebTable — HBase Table for Web Page Data
 
----
+### Table Purpose
 
-##  Project Structure
+Stores web pages’ content, metadata, and link data efficiently for fast querying and analysis.
 
-```
-├── docker-compose.yml
-├── config-hadoop/
-│   └── core-site.xml, hdfs-site.xml, yarn-site.xml, mapred-site.xml, zoo.cfg
-├── config_hive/
-│   └── hive-site.xml, tez-site.xml, entrypoint scripts
-├── scripts/
-│   ├── entrypoint.sh
-│   ├── IncLoadToStaging.sh
-│   ├── StagingSchema.sh
-│   └── IncLoadToHive.sh
-|   └── migration.sh
-├── sql/
-│   ├── staging-tables.sql
-│   ├── hive-DDL.sql
-│   ├── insert-into-hive-schema.sql
-│   └── validate-migration.sql
-```
+### Row Key Design
 
----
+- Format:  
+  `[1-byte hash] + reversed domain + ":" + page path`  
+  Example:  
+  URL `http://google.com/search` → Row key like `3-com.google:/search`
 
-##  Getting Started
+- **Why?**  
+  - Group pages by domain (reversed domain groups similar sites together).  
+  - Hash prefix distributes data evenly to avoid hotspots.  
+  - Enables efficient scans by domain prefix.
 
-### Step 1: Clone the Repo
+### Column Families
 
-```bash
-git clone https://github.com/MuhamedHekal/Hadoop-HA-Cluster-on-Docker.git
-cd Hadoop-HA-Cluster-on-Docker
-```
+| Family   | Description                         | Versions | TTL (seconds)      |
+| -------- | --------------------------------- | -------- | ------------------ |
+| Content  | Actual HTML content of the page    | 3        | 7,776,000 (90 days)|
+| Metadata | Page title, status code, size, etc | 1        | None               |
+| Outlinks | Outgoing links from the page       | 2        | 15,552,000 (180 days)|
+| Inlinks  | Incoming links to the page         | 2        | 15,552,000 (180 days)|
 
-### Step 2: Start Hadoop + Hive Cluster
+### Table Creation
 
-```bash
-docker-compose up -d
+```shell
+create 'WebTable',
+  {NAME => 'Content', VERSIONS => 3, TTL => 7776000, BLOOMFILTER => 'ROW'},
+  {NAME => 'Metadata', VERSIONS => 1},
+  {NAME => 'Outlinks', VERSIONS => 2, TTL => 15552000},
+  {NAME => 'Inlinks', VERSIONS => 2, TTL => 15552000},
+  SPLITS => ['32-', '64-', '96-', '128-', '160-', '192-', '224-']  # Pre-split regions for performance
 ```
 
----
+### Key Features
 
-##  Web Interfaces
+- **Pre-splitting** regions avoids region server hotspots during writes.
+- **TTL** automatically expires old content and links, saving space.
+- **Versioning** in Content allows tracking page changes over time.
+- Supports efficient **exact lookups** and **domain-wide scans**.
 
-| Service           | Master1          | Master2          | Master3          |
-|------------------|------------------|------------------|------------------|
-| NameNode         | http://localhost:9871 | http://localhost:9872 | http://localhost:9873 |
-| ResourceManager  | http://localhost:8088 | http://localhost:8089 | http://localhost:8090 |
+### Example Queries
 
+- Get latest HTML content by URL:
 
----
+```hbase
+get 'WebTable', '208-com.example:/page7', {COLUMN => 'Content:html'}
+```
 
-##  Hive Implementation Details
+- List all pages for domain `example.com`:
 
-###  Schema Migration
+```hbase
+scan 'WebTable', {ROWPREFIXFILTER => '5-com.example'}
+```
 
-- Migrated 9 dimensions + 1 fact table from Oracle DWH using `Sqoop`
-- Schema design follows:
-  - **Staging Layer**: External text-based Hive tables
-  - **Final Layer**: ORC-formatted ACID-compliant tables with partitioning & bucketing
+- Find pages modified after `2024-03-18`:
 
-###  Data Ingestion
-
-- `IncLoadToStaging.sh`: Bash + Sqoop to pull daily incremental data into HDFS
-- `StagingSchema.sh`: Creates Hive staging tables pointing to new HDFS folders
-- `IncLoadToHive.sh`: Handles SCD logic to update `is_current` flags and insert deltas
-
-### Optimization Techniques
-
-- **Partitioning**: By date/year, etc
-- **Bucketing**: For join performance (especially for fact tables)
-- **Tez Engine**: Fast execution with vectorized processing
-- **Compression**: ORC + Snappy
-
----
-
-##  Test and Validation
-
-```bash
-# HDFS test
-hdfs dfs -mkdir /test
-hdfs dfs -put localfile.csv /test
-hdfs dfs -ls /test
-
-# Hive row count validation
-hive -f migration/validate-migration.sql
+```hbase
+scan 'WebTable', {FILTER => "SingleColumnValueFilter('Metadata', 'modified', >=, 'binary:20240318')"}
 ```
 
 ---
 
-##  Automation
+### How to Use
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/MuhamedHekal/Hadoop-HA-Cluster-on-Docker.git
+   
+   cd Hadoop-HA-Cluster-on-Docker
+   ```
 
-| Script                 | Frequency | Purpose                                 |
-|------------------------|-----------|-----------------------------------------|
-| `IncLoadToStaging.sh`  | Daily 12AM | Pulls changed Oracle rows via Sqoop     |
-| `StagingSchema.sh`     | Daily 12AM | Maps new HDFS folders to staging tables |
-| `IncLoadToHive.sh`     | Daily 12AM | Performs merge into final Hive tables   |
-
-**Crontab Example:**
-```bash
-0 0 * * * /home/hadoop/IncLoadToStaging.sh
-```
-
----
-
-
-##  Sample Table DDL
-
-```sql
-CREATE EXTERNAL TABLE IF NOT EXISTS AirLine.customer_dim (
-  passenger_id INT,
-  passenger_name STRING,
-  passenger_dateOfBirth DATE,
-  passenger_gender STRING,
-  ...
-)
-PARTITIONED BY (start_year INT, is_current STRING)
-CLUSTERED BY (passenger_id) INTO 4 BUCKETS
-STORED AS ORC
-TBLPROPERTIES ('transactional'='true', 'orc.compress'='SNAPPY');
-```
-
----
-
-##  Data Volumes
-
-| Volume            | Used For         |
-|-------------------|------------------|
-| `hive-metastore`  | PostgreSQL metadata |
-| `namenode-data`   | HDFS NN storage     |
-| `datanode-data`   | HDFS data blocks    |
+1. **Start cluster** with `docker-compose up -d`.
+2. **Access HBase shell**:  
+   `docker exec -it hbase-master hbase shell`
+3. **Create WebTable** with the script above.
+4. **Insert web page data** using provided ingestion scripts or HBase `put` commands in [WebTable/hbase_puts.hbase](WebTable/hbase_puts.hbase).
+5. **Query data** with the example commands to test functionality.
 
